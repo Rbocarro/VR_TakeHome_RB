@@ -35,22 +35,18 @@ public class LissajousMovement : MonoBehaviour
 
 
     void Update()
-    {   
-        
-        
-        time += (Time.deltaTime * movementSpeed);   //update time
-
-        //calculate offset based on Lissajous equation on X and Y axis
-        float xPos=amplitudeX*Mathf.Sin(frequencyX*time+delta);
-        float yPos = amplitudeY * Mathf.Sin(frequencyY * time);
-        //float zPos
+    {
 
         if (LissajousMovementEnabled)
-        {
+        {           
+            time += (Time.deltaTime * movementSpeed);   //update time
+            //calculate offset based on Lissajous equation on X and Y axis
+            float xPos = amplitudeX * Mathf.Sin(frequencyX * time + delta);
+            float yPos = amplitudeY * Mathf.Sin(frequencyY * time);
+            //float zPos
             
             transform.position = startPosition + new Vector3(xPos, yPos, 0f);   //update position
         }
-
-
+  
     }
 }

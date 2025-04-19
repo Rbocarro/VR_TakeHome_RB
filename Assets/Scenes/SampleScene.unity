@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 99537890}
   - component: {fileID: 99537889}
   - component: {fileID: 99537888}
+  - component: {fileID: 99537894}
   m_Layer: 0
   m_Name: TestSphere
   m_TagString: Untagged
@@ -183,7 +184,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: d0004594dd7b84240801633e37e0432b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -214,13 +215,22 @@ TrailRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0.008476257
-        value: 0.0127391815
+        value: 0.03822136
         inSlope: 0
         outSlope: 0
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
         outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.8841808
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -355,6 +365,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &99537894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99537887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e04ecff9c11518c40b229dd9a2c44286, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noiseScale: 1
+  noiseDisplacement: 1
+  noiseDirection: {x: 0, y: 0}
 --- !u!1 &136505499 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1767192433, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
@@ -1034,9 +1059,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3282859069fb2824c91f7ec467c07e2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sphereMeshResolution: 0
+  gameObjectName: Object A
+  material: {fileID: 2100000, guid: f5ccd52dc494e054fbe7d7161dcabe25, type: 2}
+  sphereMeshResolution: 24
   sphereMeshRadius: 1
-  coneMeshResolution: 0
+  coneMeshSegments: 8
+  coneMeshHeight: 0.5
+  coneMeshBaseRadius: 0.2
 --- !u!1 &698035291
 GameObject:
   m_ObjectHideFlags: 0
@@ -1819,6 +1848,10 @@ PrefabInstance:
     - target: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_Name
       value: XR Origin (XR Rig)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalPosition.x
