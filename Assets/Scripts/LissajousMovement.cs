@@ -1,52 +1,69 @@
 using UnityEngine;
-
+using static LissajousMovement;
 public class LissajousMovement : MonoBehaviour
 {
     [Header("Amplitude Controls")]
     [SerializeField,Range(0, 6)]
-    private float amplitudeX = 1f;
+    public float amplitudeX = 1f;
     [SerializeField, Range(0, 6)]
-    private float amplitudeY = 1f;
+    public float amplitudeY = 1f;
     // private float amplitudeZ = 1f;
 
     [Header("Frequency Controls")]
     [SerializeField, Range(0, 6)]
-    private float frequencyX = 1f;
+    public float frequencyX = 1f;
     [SerializeField, Range(0, 6)]
-    private float frequencyY = 1f;
+    public float frequencyY = 1f;
     //private float frequencyZ = 1f;
 
     [Header("Animation Controls")]
-    public float delta = 0f;
-
+    [SerializeField, Range(0, 5)]
+    public float phaseAngle = 0f;
     [SerializeField, Range(0, 10)]
     public float movementSpeed=1f;
+    [SerializeField, Range(0, 2)]
+    public float animationScale = 1f;
 
-    private float time;                     //interal time tracker
-    private Vector3 startPosition;          //start postion
-    [SerializeField]
-    private bool LissajousMovementEnabled;  //Lissajous Movement Enabled. need to implement acess to other scripts
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private float time;                     //internal time tracker
+    private Vector3 startPosition;          //internal start postion
+    private float xPos, yPos;               //internal X, Y position tracker
+
+    public enum LissajousCurveType {Standard,Heart,Butterfly }
+    public LissajousCurveType curveType;
+
+
     void Start()
     {
         startPosition=transform.position;
+        curveType =LissajousCurveType.Standard;
     }
-
-
     void Update()
     {
+        time += (Time.deltaTime * movementSpeed);   //update time
+        switch (curveType)
+        {
+            case LissajousCurveType.Standard:
+                //calculate offset based on standard Lissajous equation on X and Y axis
+                xPos = amplitudeX * Mathf.Sin(frequencyX * time + phaseAngle);
+                yPos = amplitudeY * Mathf.Sin(frequencyY * time);
+                break;
 
-        if (LissajousMovementEnabled)
-        {           
-            time += (Time.deltaTime * movementSpeed);   //update time
-            //calculate offset based on Lissajous equation on X and Y axis
-            float xPos = amplitudeX * Mathf.Sin(frequencyX * time + delta);
-            float yPos = amplitudeY * Mathf.Sin(frequencyY * time);
-            //float zPos
-            
-            transform.position = startPosition + new Vector3(xPos, yPos, 0f);   //update position
+            case LissajousCurveType.Heart:
+                //calculate offset based on Heart Lissajous equation on X and Y axis
+                xPos =  5 * Mathf.Pow(Mathf.Sin(time), 3);//5 sin3t,
+                yPos =  4 * Mathf.Cos(time) - 1.3f * Mathf.Cos(2 * time) - 0.6f * Mathf.Cos(3 * time) - 0.2f * Mathf.Cos(4 * time);
+                break;
+
+            case LissajousCurveType.Butterfly:
+                float sinT = Mathf.Sin(time);
+                float cosT = Mathf.Cos(time);
+                float butterflyComponent = Mathf.Exp(cosT) - 2 * Mathf.Cos(4 * time) - Mathf.Pow(Mathf.Sin(time / 12f), 5);
+                xPos= amplitudeX * sinT * butterflyComponent;
+                yPos= amplitudeY * cosT * butterflyComponent;
+                break;
         }
-  
+
+        transform.position = startPosition + (new Vector3(xPos, yPos, 0f)* animationScale);   //update position
     }
 }
