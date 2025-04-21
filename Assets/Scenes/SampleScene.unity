@@ -591,7 +591,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2139849738}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 2
+  m_MaxValue: 1.2
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
@@ -2454,7 +2454,7 @@ GameObject:
   - component: {fileID: 365311133}
   - component: {fileID: 365311132}
   m_Layer: 0
-  m_Name: RandomiseButton (1)
+  m_Name: ResetButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2587,18 +2587,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 372386487}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.001, y: 0.001, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1451522453}
-  m_Father: {fileID: 1573209550}
+  m_Father: {fileID: 1432012187}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.3675, y: 0.081970215}
-  m_SizeDelta: {x: 103.62872, y: 52.12741}
+  m_AnchoredPosition: {x: 313.8008, y: -75.03133}
+  m_SizeDelta: {x: 178.62872, y: 127.12741}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &372386489
 MonoBehaviour:
@@ -3505,7 +3505,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 610622921}
-        m_TargetAssemblyTypeName: DemoClass, Assembly-CSharp
+        m_TargetAssemblyTypeName: DemoManager, Assembly-CSharp
         m_MethodName: SpawnObjectB
         m_Mode: 1
         m_Arguments:
@@ -3513,7 +3513,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Object B
+          m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &494987746
@@ -4942,18 +4942,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectA: {fileID: 0}
   objectB: {fileID: 0}
-  LissajousPanel: {fileID: 924224645}
+  LissajousPanel: {fileID: 1432012186}
   lissajousTrailMaterial: {fileID: 2100000, guid: d0004594dd7b84240801633e37e0432b, type: 2}
-  objectADropdown: {fileID: 2086086970}
-  objectAFrequencyXSlider: {fileID: 1572097234}
-  objectAFrequencyYSlider: {fileID: 2064752917}
-  objectAAmplitudeXSlider: {fileID: 949047617}
-  objectAAmplitudeYSlider: {fileID: 17552873}
-  objectADeltaSlider: {fileID: 1663540313}
-  objectAMovementSpeed: {fileID: 1333467806}
-  objectAAnimationScale: {fileID: 1424148053}
-  objectRotationnPanel: {fileID: 0}
-  vertexAnimationPanel: {fileID: 0}
+  objectAUI:
+    dropdown: {fileID: 2086086970}
+    frequencyX: {fileID: 1572097234}
+    frequencyY: {fileID: 2064752917}
+    amplitudeX: {fileID: 949047617}
+    amplitudeY: {fileID: 17552873}
+    phaseAngle: {fileID: 1663540313}
+    movementSpeed: {fileID: 1333467806}
+    animationScale: {fileID: 1424148053}
+    randomiseButton: {fileID: 1828495272}
+    ResetButton: {fileID: 365311132}
+  objectBUI:
+    dropdown: {fileID: 783681107}
+    frequencyX: {fileID: 101240798}
+    frequencyY: {fileID: 1921274601}
+    amplitudeX: {fileID: 1453821786}
+    amplitudeY: {fileID: 1310829475}
+    phaseAngle: {fileID: 651478593}
+    movementSpeed: {fileID: 1433274270}
+    animationScale: {fileID: 42136643}
+    randomiseButton: {fileID: 894845113}
+    ResetButton: {fileID: 1466955308}
+  objectRotationPanel: {fileID: 0}
+  vertexAnimationPanel: {fileID: 547078574}
 --- !u!114 &610622928
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5724,7 +5738,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 610622921}
-        m_TargetAssemblyTypeName: DemoClass, Assembly-CSharp
+        m_TargetAssemblyTypeName: DemoManager, Assembly-CSharp
         m_MethodName: SpawnObjectA
         m_Mode: 1
         m_Arguments:
@@ -5732,7 +5746,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Object A
+          m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &714697358
@@ -7512,18 +7526,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 924224645}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.001, y: 0.001, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1534243335}
-  m_Father: {fileID: 1573209550}
+  m_Father: {fileID: 1432012187}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.1581192, y: 0.081970215}
-  m_SizeDelta: {x: 103.62872, y: 52.12741}
+  m_AnchoredPosition: {x: 104.41971, y: -75.03133}
+  m_SizeDelta: {x: 178.62872, y: 127.12741}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &924224648
 MonoBehaviour:
@@ -10118,7 +10132,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1297291018}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 2
+  m_MaxValue: 1.2
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
@@ -10146,7 +10160,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1432012187}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: LeftController_LissajousSidePanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10163,7 +10177,9 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.001, y: 0.001, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 924224646}
+  - {fileID: 372386488}
   m_Father: {fileID: 1573209550}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -10703,7 +10719,7 @@ GameObject:
   - component: {fileID: 1466955309}
   - component: {fileID: 1466955308}
   m_Layer: 0
-  m_Name: RandomiseButton (1)
+  m_Name: ResetButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11625,9 +11641,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1968292675}
-  - {fileID: 924224646}
   - {fileID: 1432012187}
-  - {fileID: 372386488}
   - {fileID: 547078577}
   m_Father: {fileID: 1052719918}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}

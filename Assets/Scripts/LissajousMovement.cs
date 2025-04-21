@@ -1,5 +1,5 @@
 using UnityEngine;
-using static LissajousMovement;
+
 public class LissajousMovement : MonoBehaviour
 {
     [Header("Amplitude Controls")]

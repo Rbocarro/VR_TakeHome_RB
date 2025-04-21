@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class DemoManager : MonoBehaviour
 {
+    [Header("Demo GameObjects")]
     [SerializeField]
     private GameObject objectA;
     [SerializeField]
@@ -14,17 +15,8 @@ public class DemoManager : MonoBehaviour
     [Header("Lissajous Panel")]
     public GameObject LissajousPanel;
     public Material lissajousTrailMaterial;
-
-    public TMP_Dropdown objectADropdown; // Use TextMeshPro Dropdown
-    public Slider objectAFrequencyXSlider;
-    public Slider objectAFrequencyYSlider;
-    public Slider objectAAmplitudeXSlider;
-    public Slider objectAAmplitudeYSlider;
-    public Slider objectADeltaSlider;
-    public Slider objectAMovementSpeed;
-    public Slider objectAAnimationScale;
-
-
+    public LissajousUIBindings objectAUI;
+    public LissajousUIBindings objectBUI;
 
     [Header("Object Rotation Panel")]
     public GameObject objectRotationPanel;
@@ -36,99 +28,84 @@ public class DemoManager : MonoBehaviour
     {
         LissajousPanel.SetActive(false);
     }
+
     public void SetupLissajousDemo()
     {
         if (objectA == null) {  SpawnObjectA(); }
         if (objectB == null) {  SpawnObjectB(); }
+        DisableAutoRotation(objectA);
+        DisableAutoRotation(objectB);
         LissajousPanel.SetActive(true);
+        objectA.GetComponent<LissajousMovement>().enabled=true;
+        objectB.GetComponent<LissajousMovement>().enabled = true;
         var lissajousA = objectA.GetComponent<LissajousMovement>();
-
-        List<string> options = new List<string>(
-        System.Enum.GetNames(typeof(LissajousMovement.LissajousCurveType)));
-        objectADropdown.ClearOptions();
-        objectADropdown.AddOptions(options);
-
-        // Sync dropdown value with current curveType
-        objectADropdown.value = (int)lissajousA.curveType;
-        objectADropdown.onValueChanged.AddListener((index) =>
-        {
-            lissajousA.curveType =(LissajousMovement.LissajousCurveType)index;
-        });
-
-        
-
-        // Setup slider listeners
-        objectAFrequencyXSlider.onValueChanged.AddListener((value) => lissajousA.frequencyX = value);                                                 
-        objectAFrequencyYSlider.onValueChanged.AddListener((value) => lissajousA.frequencyY = value);
-        objectAAmplitudeXSlider.onValueChanged.AddListener((value) => lissajousA.amplitudeX = value);
-        objectAAmplitudeYSlider.onValueChanged.AddListener((value) => lissajousA.amplitudeY = value);
-        objectADeltaSlider.onValueChanged.AddListener((value) => lissajousA.phaseAngle = value);
-        objectAMovementSpeed.onValueChanged.AddListener((value) => lissajousA.movementSpeed = value);
-        objectAAnimationScale.onValueChanged.AddListener((value) => lissajousA.animationScale = value);
-
-        // initialise sliders to match the default Lissajous values
-        objectAFrequencyXSlider.value = lissajousA.frequencyX;
-        objectAFrequencyYSlider.value = lissajousA.frequencyY;
-        objectAAmplitudeXSlider.value = lissajousA.amplitudeX;
-        objectAAmplitudeYSlider.value = lissajousA.amplitudeY;
-        objectADeltaSlider.value = lissajousA.phaseAngle;
-        objectAMovementSpeed.value = lissajousA.movementSpeed;
-        objectAAnimationScale.value=lissajousA.animationScale;
+        var lissajousB = objectB.GetComponent<LissajousMovement>();
+        objectAUI.BindTo(lissajousA);
+        objectBUI.BindTo(lissajousB);
     }
 
-
-
     public void SpawnObjectA()
-    {   if (objectA == null)
-        {
-            objectA = GetComponent<ProceduralMeshGenerator>().GenerateDemoGameobject("Object A");
-            objectA.transform.position = new Vector3(GetComponent<XROrigin>().Camera.transform.position.x-0.5f,
-                                                     GetComponent<XROrigin>().Camera.transform.position.y,
-                                                     GetComponent<XROrigin>().Camera.transform.position.z + 0.5f);
-            //objectA.transform.SetParent(GetComponent<XROrigin>().Origin.transform);
-            objectA.AddComponent<LissajousMovement>();
-            objectA.AddComponent<TrailRenderer>();
-            objectA.GetComponent<TrailRenderer>().material = lissajousTrailMaterial;
-            objectA.GetComponent<TrailRenderer>().startWidth = 0.05f;
-            objectA.GetComponent<TrailRenderer>().endWidth = 0.05f;
-            objectA.GetComponent<TrailRenderer>().time=1f;
-
-        }
-        
-      
+    {
+        if (objectA == null) { objectA = SpawnObject("Object A", new Vector3(-0.5f, 0f, 0.5f), Color.red);}
     }
 
     public void SpawnObjectB()
     {
-        if (objectB == null)
-        {
-            objectB = GetComponent<ProceduralMeshGenerator>().GenerateDemoGameobject("Object B");
-            objectB.transform.position = new Vector3(GetComponent<XROrigin>().Camera.transform.position.x+0.5f,
-                                                     GetComponent<XROrigin>().Camera.transform.position.y,
-                                                     GetComponent<XROrigin>().Camera.transform.position.z + 0.5f);
-            objectB.transform.SetParent(transform);
-            objectB.AddComponent<LissajousMovement>();
-        }
-        
+        if (objectB == null) { objectB = SpawnObject("Object B", new Vector3(0.5f, 0f, 0.5f), Color.blue); }
     }
 
-    public void RandomiseLissajousValues()
+
+    private GameObject SpawnObject(string name, Vector3 offset, Color trailColor)
     {
-        objectAFrequencyXSlider.value = Random.Range(objectAFrequencyXSlider.minValue, objectAFrequencyXSlider.maxValue);
-        objectAFrequencyYSlider.value = Random.Range(objectAFrequencyYSlider.minValue, objectAFrequencyYSlider.maxValue);
-        objectAAmplitudeXSlider.value = Random.Range(objectAAmplitudeXSlider.minValue, objectAAmplitudeXSlider.maxValue);
-        objectAAmplitudeYSlider.value = Random.Range(objectAAmplitudeYSlider.minValue, objectAAmplitudeYSlider.maxValue);
-        objectADeltaSlider.value = Random.Range(objectADeltaSlider.minValue, objectADeltaSlider.maxValue);
-        objectAMovementSpeed.value = Random.Range(objectAMovementSpeed.minValue, objectAMovementSpeed.maxValue);
+        GameObject obj = GetComponent<ProceduralMeshGenerator>().GenerateDemoGameobject(name);
+        var xrOrigin = GetComponent<XROrigin>();
+
+        obj.transform.position = xrOrigin.Camera.transform.position + offset;
+        obj.transform.SetParent(transform);
+
+        obj.AddComponent<LissajousMovement>();
+        obj.GetComponent<LissajousMovement>().enabled = false;
+
+        // Trail renderer setup
+        var trail = obj.AddComponent<TrailRenderer>();
+        var TrailMat = new Material(lissajousTrailMaterial);
+        TrailMat.color = trailColor;
+        trail.material = TrailMat; 
+        trail.startColor = trailColor;
+        trail.endColor = trailColor;
+        trail.startWidth = 0.05f;
+        trail.endWidth = 0.05f;
+        trail.time = 1f;
+
+        // Auto rotate setup
+        var autoRotate = obj.AddComponent<AutoRotator>();
+        autoRotate.rotationSpeed = 45f;
+        autoRotate.isActive = true;
+
+        return obj;
     }
 
-    public void ResetLissajousValues()
-    {
-        //TO DO
-    }
 
     public void ObjectRotationDemo()
-    { 
+    {
         //TO DO
+        //set A object infront of the camera
+        //
+
+        if (objectA == null) { SpawnObjectA(); }
+        if (objectB == null) { SpawnObjectB(); }
+        DisableAutoRotation(objectA);
+        DisableAutoRotation(objectB);
+    }
+
+
+    private void DisableAutoRotation(GameObject obj)
+    {
+        var rotator = obj.GetComponent<AutoRotator>();
+        if (rotator != null)
+        {
+            rotator.isActive = false;
+            obj.transform.rotation = Quaternion.identity;
+        }
     }
 }
