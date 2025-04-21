@@ -7,7 +7,9 @@ using System.Collections.Generic;
 
 //helper class for deluttering LissajousUI elements
 public class LissajousUIBindings
-{
+{   
+
+    //UI elements
     public TMP_Dropdown dropdown;
     public Slider frequencyX;
     public Slider frequencyY;
