@@ -3,9 +3,9 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 
-[System.Serializable]
 
 //helper class for deluttering LissajousUI elements
+[System.Serializable]
 public class LissajousUIBindings
 {   
 

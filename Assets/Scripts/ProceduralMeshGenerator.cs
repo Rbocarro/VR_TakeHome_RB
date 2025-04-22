@@ -1,30 +1,23 @@
 using Unity.XR.CoreUtils;
 using UnityEngine;
-
-
-
-    public class ProceduralMeshGenerator:MonoBehaviour
+[System.Serializable]
+public class ProceduralMeshGenerator
     {
-        [SerializeField]
-        private Material defaultMeshMaterial;
-
+        public Material defaultMeshMaterial;
 
         [Header("Cone Mesh Settings")]
-        [SerializeField]
-        private int sphereMeshResolution;
+        public int sphereMeshResolution=32;
         [SerializeField, Range(0.1f, 5f)]
         private float sphereMeshRadius = 1;
 
         [Header("Sphere Mesh Settings")]
         [SerializeField]
-        private int coneMeshSegments;
+        private int coneMeshSegments=8;
         [SerializeField]
-        private float coneMeshHeight;
+        private float coneMeshHeight= 0.075f;
         [SerializeField]
-        private float coneMeshBaseRadius;
-
-
-
+        private float coneMeshBaseRadius= 0.03f;
+        // ref:https://danielsieger.com/blog/2021/03/27/generating-spheres.html
         Mesh GenerateUVSphereMesh(int resolution, float radius)//Generate UV sphere
         {
             //create new mesh object

@@ -22,8 +22,7 @@ public class LissajousMovement : MonoBehaviour
     [SerializeField, Range(0, 10)]
     public float movementSpeed=1f;
     [SerializeField, Range(0, 2)]
-    public float animationScale = 1f;
-
+    public float animationScale = 0.5f;
 
     private float time;                     //internal time tracker
     private Vector3 startPosition;          //internal start postion
