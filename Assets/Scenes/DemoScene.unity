@@ -6363,7 +6363,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &698035292
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -18130,7 +18130,7 @@ MonoBehaviour:
   m_StartCorner: 0
   m_StartAxis: 0
   m_CellSize: {x: 25, y: 25}
-  m_Spacing: {x: 11.4, y: 13}
+  m_Spacing: {x: 12.27, y: 8.8}
   m_Constraint: 0
   m_ConstraintCount: 2
 --- !u!1 &2013651026
