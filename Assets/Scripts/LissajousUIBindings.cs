@@ -78,7 +78,6 @@ namespace Demo.LissajousAnimation
             phaseAngle.value = 1;
             movementSpeed.value = 2;
             animationScale.value = 1;
-            //curveTypeDropdown.value = (int)lissajous.curveType;
         }
     }
 }

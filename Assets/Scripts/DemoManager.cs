@@ -6,6 +6,7 @@ using UnityEngine.XR.Interaction.Toolkit.Inputs;
 using Demo.Utility;
 using Demo.VertexAnimation;
 using Demo.LissajousAnimation;
+using Demo.ColorChange;
 public class DemoManager : MonoBehaviour
 {
     [Header("Demo GameObjects")]
@@ -29,11 +30,10 @@ public class DemoManager : MonoBehaviour
     private Coroutine rotationRoutine;
 
     [Header("Color Change Demo Settings")]
+    public ColorChangeDemoHandler colorChangeHandler;
     public GameObject colorChangePanel;
-    public float rotationSpeed;             //rotation speed of obj B around A
-    public Slider rotationSpeedSlider;
-    public Material colorChangeMaterial;
     private Coroutine colorChangeRoutine;
+    
 
     [Header("Vertex Animation Demo Settings")]
     public GameObject vertexAnimationPanel;
@@ -81,9 +81,10 @@ public class DemoManager : MonoBehaviour
             objectA.GetComponent<VertexDisplacement>().enabled = false;
         }
         
-
         objectA.GetComponent<LissajousMovement>().enabled=true;
         objectB.GetComponent<LissajousMovement>().enabled = true;
+        objectA.GetComponent<TrailRenderer>().enabled = true;
+        objectB.GetComponent<TrailRenderer>().enabled = true;
         var lissajousA = objectA.GetComponent<LissajousMovement>();
         var lissajousB = objectB.GetComponent<LissajousMovement>();
         objectAUI.BindTo(lissajousA);
@@ -182,38 +183,16 @@ public class DemoManager : MonoBehaviour
         objectA.transform.position = xrOrigin.Camera.transform.position + xrOrigin.Camera.transform.forward * 1f;
         objectA.transform.rotation = Quaternion.LookRotation(Vector3.right, Vector3.up);
 
+        colorChangeHandler.Initialise(objectA, objectB, xrOrigin);
         // Apply the material with the shader
         var objectArenderer = objectA.GetComponent<Renderer>();
-        objectArenderer.material = new Material(colorChangeMaterial);
+        objectArenderer.material = new Material(colorChangeHandler.colorChangeMaterial);
 
-        rotationSpeedSlider.onValueChanged.AddListener((value) => rotationSpeed = value);
-        rotationSpeedSlider.value = rotationSpeed;
+        colorChangeHandler.rotationSpeedSlider.onValueChanged.AddListener((value) => colorChangeHandler.rotationSpeed = value);
+        colorChangeHandler.rotationSpeedSlider.value = colorChangeHandler.rotationSpeed;
 
         // Start coroutine
-        colorChangeRoutine = StartCoroutine(ColorChangeEffect());
-    }
-    private IEnumerator<WaitForEndOfFrame> ColorChangeEffect()
-    {
-        float angle = 0f;
-        float radius = 0.7f;
-        var mat = objectA.GetComponent<Renderer>().material;
-
-        while (true)
-        {
-            angle += Time.deltaTime * rotationSpeed;
-            float x = Mathf.Cos(angle) * radius;
-            float y = Mathf.Sin(angle) * radius;
-
-            //spin arond the Z axis
-            objectB.transform.position = objectA.transform.position + new Vector3(x, y, 0);
-
-            // Update dot product and send it to shader
-            Vector3 dirToB = (objectB.transform.position - objectA.transform.position).normalized;
-            float dot = Vector3.Dot(objectA.transform.forward, dirToB);
-            mat.SetFloat("_DotProduct", dot);
-
-            yield return null;
-        }
+        colorChangeRoutine = StartCoroutine(colorChangeHandler.ColorChangeEffect());
     }
     public void SetupVertexAnimationDemo()
     {
@@ -286,10 +265,8 @@ public class DemoManager : MonoBehaviour
     private IEnumerator<WaitForEndOfFrame> VRAttractionEffect()
     {
         float attractionRadius=0.4f;
-
         while (true)
         {   
-
             //Attract obj A or B to their respective controllers if they are within distance
             if(Vector3.Distance(objectA.transform.position,rightController.position) < attractionRadius)
             {
@@ -302,7 +279,6 @@ public class DemoManager : MonoBehaviour
             yield return null;
         }
     }
-
     #region Helper Functions
     public void SpawnObjectA()
     {
@@ -365,14 +341,12 @@ public class DemoManager : MonoBehaviour
         colorChangePanel.SetActive(active);
         vrAttractorSidePanel.SetActive(active);
     }
-
     public void ResetVRAttractionDemo()
     {
         var xrOrigin = GetComponent<XROrigin>();
         var camTransform = xrOrigin.Camera.transform;
         objectA.transform.position = camTransform.position + (camTransform.forward * 0.3f) + (camTransform.right * -.3f) + (camTransform.up * 0);
         objectB.transform.position = camTransform.position + (camTransform.forward * 0.3f) + (camTransform.right * .3f) + (camTransform.up * 0);
-        
     }
     #endregion
 }
