@@ -7,6 +7,8 @@ using Demo.Utility;
 using Demo.VertexAnimation;
 using Demo.LissajousAnimation;
 using Demo.ColorChange;
+using Demo.ObjectRotation;
+using Demo.VRAttractor;
 public class DemoManager : MonoBehaviour
 {
     [Header("Demo GameObjects")]
@@ -24,9 +26,7 @@ public class DemoManager : MonoBehaviour
 
     [Header("Object Rotation Demo Settings")]
     public GameObject objectRotationPanel;
-    public float angularSpeed;// Object A angular Rotation Speed
-    public float radiusAroundObjectA;//radius around object A where obj B spawns around
-    public Slider angularSpeedSlider;
+    public ObjectRotationDemoHandler objectRotationDemoHandler;
     private Coroutine rotationRoutine;
 
     [Header("Color Change Demo Settings")]
@@ -41,16 +41,10 @@ public class DemoManager : MonoBehaviour
     public Slider noiseScaleSlider;
     public Slider noiseDisplacementSlider;
     public Material VertexAnimationMaterial;
-    private Coroutine vertexDisplacementRoutine;
 
     [Header("VR Attractor Settings")]
     public GameObject vrAttractorSidePanel;
-    public Transform leftController;
-    public Transform rightController;
-    public float rightControllerattractionForce;
-    public float leftControllerattractionForce;
-    public Slider rightControllerattractionForceSlider;
-    public Slider leftControllerattractionForceSlider;
+    public VRAttractorHandler vrAttractorHandler;
     private Coroutine vrAttractionRoutine;
 
     private void Start()
@@ -116,8 +110,10 @@ public class DemoManager : MonoBehaviour
         objectB.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
         objectB.GetComponent<Renderer>().material.color = Color.blue;
 
-        angularSpeedSlider.onValueChanged.AddListener((value) => angularSpeed = value);
-        angularSpeedSlider.value=angularSpeed;
+        objectRotationDemoHandler.Initialise(objectA, objectB);
+
+        objectRotationDemoHandler.angularSpeedSlider.onValueChanged.AddListener((value) => objectRotationDemoHandler.angularSpeed = value);
+        objectRotationDemoHandler.angularSpeedSlider.value=objectRotationDemoHandler.angularSpeed;
         
 
         // Move objectA to be directly in front of the camera
@@ -126,37 +122,7 @@ public class DemoManager : MonoBehaviour
         objectA.transform.position = cameraTransform.position + cameraTransform.forward * 1f;
 
         // Start coroutine
-        rotationRoutine = StartCoroutine(RotateTowardsMovingTarget());
-    }
-    private IEnumerator<WaitForEndOfFrame> RotateTowardsMovingTarget()
-    {
-        while (true)
-        {
-            // Position objectB randomly around objectA
-            Vector3 randomOffset = Random.onUnitSphere;
-            randomOffset = randomOffset.normalized * radiusAroundObjectA;
-            objectB.transform.position = objectA.transform.position + randomOffset;
-
-            // Rotate object A to face object B over time
-            while (true)
-            {
-                // Calculate dir vector from rotatingObject to targetObject
-                Vector3 direction = objectB.transform.position - objectA.transform.position;
-
-                Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
-                objectA.transform.rotation = Quaternion.RotateTowards(
-                    objectA.transform.rotation,
-                    targetRotation,
-                    angularSpeed * Time.deltaTime
-                );
-
-                float angleDiff = Quaternion.Angle(objectA.transform.rotation, targetRotation);
-                if (angleDiff < 1f) break;
-
-                yield return null;
-            }
-
-        }
+        rotationRoutine = StartCoroutine(objectRotationDemoHandler.RotateTowardsMovingTarget());
     }
     public void SetupColorChangeDemo()
     {
@@ -183,7 +149,7 @@ public class DemoManager : MonoBehaviour
         objectA.transform.position = xrOrigin.Camera.transform.position + xrOrigin.Camera.transform.forward * 1f;
         objectA.transform.rotation = Quaternion.LookRotation(Vector3.right, Vector3.up);
 
-        colorChangeHandler.Initialise(objectA, objectB, xrOrigin);
+        colorChangeHandler.Initialise(objectA, objectB);
         // Apply the material with the shader
         var objectArenderer = objectA.GetComponent<Renderer>();
         objectArenderer.material = new Material(colorChangeHandler.colorChangeMaterial);
@@ -253,31 +219,15 @@ public class DemoManager : MonoBehaviour
         objectB.GetComponent<Renderer>().material.color = Color.blue;
 
         // Move objectA to be directly in front of the camera
+        vrAttractorHandler.Initialise(objectA, objectB);
         ResetVRAttractionDemo();
 
-        rightControllerattractionForceSlider.onValueChanged.AddListener((value) => rightControllerattractionForce = value);
-        leftControllerattractionForceSlider.onValueChanged.AddListener((value) => leftControllerattractionForce = value);
-        rightControllerattractionForceSlider.value = rightControllerattractionForce;
-        leftControllerattractionForceSlider.value= leftControllerattractionForce;
+        vrAttractorHandler.rightControllerattractionForceSlider.onValueChanged.AddListener((value) => vrAttractorHandler.rightControllerattractionForce = value);
+        vrAttractorHandler.leftControllerattractionForceSlider.onValueChanged.AddListener((value) => vrAttractorHandler.leftControllerattractionForce = value);
+        vrAttractorHandler.rightControllerattractionForceSlider.value = vrAttractorHandler.rightControllerattractionForce;
+        vrAttractorHandler.leftControllerattractionForceSlider.value= vrAttractorHandler.leftControllerattractionForce;
 
-        vrAttractionRoutine = StartCoroutine(VRAttractionEffect());
-    }
-    private IEnumerator<WaitForEndOfFrame> VRAttractionEffect()
-    {
-        float attractionRadius=0.4f;
-        while (true)
-        {   
-            //Attract obj A or B to their respective controllers if they are within distance
-            if(Vector3.Distance(objectA.transform.position,rightController.position) < attractionRadius)
-            {
-                objectA.transform.position = Vector3.Lerp(objectA.transform.position, rightController.transform.position, rightControllerattractionForce * Time.deltaTime);
-            }
-            if (Vector3.Distance(objectB.transform.position, leftController.position) <= attractionRadius)
-            {
-                objectB.transform.position = Vector3.Lerp(objectB.transform.position, leftController.transform.position, leftControllerattractionForce * Time.deltaTime);
-            }
-            yield return null;
-        }
+        vrAttractionRoutine = StartCoroutine(vrAttractorHandler.VRAttractionEffect());
     }
     #region Helper Functions
     public void SpawnObjectA()

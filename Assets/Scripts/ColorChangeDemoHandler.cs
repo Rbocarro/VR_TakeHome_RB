@@ -13,13 +13,13 @@ namespace Demo.ColorChange
         public float rotationSpeed;
         private GameObject objectA;
         private GameObject objectB;
-        private XROrigin xrOrigin;
+        //private XROrigin xrOrigin;
 
-        public void Initialise(GameObject a, GameObject b, XROrigin origin)
+        public void Initialise(GameObject a, GameObject b)
         {
             objectA = a;
             objectB = b;
-            xrOrigin = origin;
+            //xrOrigin = origin;
         }
 
         public IEnumerator<WaitForEndOfFrame> ColorChangeEffect()

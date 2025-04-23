@@ -1,0 +1,43 @@
+using System.Collections.Generic;
+using Unity.XR.CoreUtils;
+using UnityEngine;
+using UnityEngine.UI;
+namespace Demo.VRAttractor
+{
+    [System.Serializable]
+    public class VRAttractorHandler 
+    {
+        public Transform leftController;
+        public Transform rightController;
+        public float rightControllerattractionForce;
+        public float leftControllerattractionForce;
+        public float attractionRadius = 0.4f;
+        public Slider rightControllerattractionForceSlider;
+        public Slider leftControllerattractionForceSlider;
+
+        private GameObject objectA;
+        private GameObject objectB;
+
+        public void Initialise(GameObject a, GameObject b)
+        {
+            objectA = a;
+            objectB = b;
+        }
+        public IEnumerator<WaitForEndOfFrame> VRAttractionEffect()
+        {
+            while (true)
+            {
+                //Attract obj A or B to their respective controllers if they are within distance
+                if (Vector3.Distance(objectA.transform.position, rightController.position) < attractionRadius)
+                {
+                    objectA.transform.position = Vector3.Lerp(objectA.transform.position, rightController.transform.position, rightControllerattractionForce * Time.deltaTime);
+                }
+                if (Vector3.Distance(objectB.transform.position, leftController.position) <= attractionRadius)
+                {
+                    objectB.transform.position = Vector3.Lerp(objectB.transform.position, leftController.transform.position, leftControllerattractionForce * Time.deltaTime);
+                }
+                yield return null;
+            }
+        }
+    }
+}
