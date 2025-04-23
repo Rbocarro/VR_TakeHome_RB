@@ -3,6 +3,9 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.Inputs;
+using Demo.Utility;
+using Demo.VertexAnimation;
+using Demo.LissajousAnimation;
 public class DemoManager : MonoBehaviour
 {
     [Header("Demo GameObjects")]
@@ -14,7 +17,7 @@ public class DemoManager : MonoBehaviour
 
     [Header("Lissajous Demo Settings")]
     public GameObject LissajousPanel;
-    public Material lissajousTrailMaterial;//default placeholder material for LJ demo
+    public Material lissajousTrailMaterial;//default placeholder trail material for LJ demo
     public LissajousUIBindings objectAUI;
     public LissajousUIBindings objectBUI;
 
@@ -28,12 +31,15 @@ public class DemoManager : MonoBehaviour
     [Header("Color Change Demo Settings")]
     public float rotationSpeed;             //rotation speed of obj B around A
     public GameObject colorChangePanel;
-    public Material colorChangeMaterial;    
+    public Material colorChangeMaterial;
     private Coroutine colorChangeRoutine;
 
     [Header("Vertex Animation Demo Settings")]
     public GameObject vertexAnimationPanel;
-    public VertexDisplacement DisplacementSettings;
+    public Slider noiseScrollSpeedSlider;
+    public Slider noiseScaleSlider;
+    public Slider noiseDisplacementSlider;
+    private Coroutine vertexDisplacementRoutine;
 
     [Header("VR Attractor Settings")]
     public GameObject vrAttractorSidePanel;
@@ -53,6 +59,9 @@ public class DemoManager : MonoBehaviour
         //get reference to L and R controller positions
         leftController = GetComponent<XRInputModalityManager>().leftController.transform;
         rightController= GetComponent<XRInputModalityManager>().rightController.transform;
+
+        //debug
+        
     }
     public void SetupLissajousDemo()
     {
@@ -173,6 +182,8 @@ public class DemoManager : MonoBehaviour
 
         // Start coroutine
         colorChangeRoutine = StartCoroutine(ColorChangeEffect());
+
+
     }
     private IEnumerator<WaitForEndOfFrame> ColorChangeEffect()
     {
@@ -209,15 +220,29 @@ public class DemoManager : MonoBehaviour
         if (objectA == null) { SpawnObjectA(); }
         if (objectB != null) objectB.transform.position=new Vector3(0,-100f,0);// move object B out of view
         TogglePanels(vertexAnimationPanel);
-        objectA.GetComponent<AutoRotator>().enabled = true;
 
         // Stop other routines
         StopAllCoroutines();
 
         // Position Object A in center of view
         var xrOrigin = GetComponent<XROrigin>();
-        objectA.transform.position = xrOrigin.Camera.transform.position + xrOrigin.Camera.transform.forward * 0.5f;
+        objectA.transform.position = xrOrigin.Camera.transform.position + xrOrigin.Camera.transform.forward * 2f;
+
+        //Make sure the object has a VertexDisplacement component
+        var displacer = objectA.GetComponent<VertexDisplacement>();
+        if (displacer == null)
+            displacer = objectA.AddComponent<VertexDisplacement>();
+
+        // Sync sliders to values and setup UI bindings
+        noiseScrollSpeedSlider.value = displacer.scrollSpeed;
+        noiseScaleSlider.value = displacer.noiseScale;
+        noiseDisplacementSlider.value = displacer.noiseDisplacement;
+
+        noiseScrollSpeedSlider.onValueChanged.AddListener((val) => displacer.scrollSpeed = val);
+        noiseScaleSlider.onValueChanged.AddListener((val) => displacer.noiseScale = val);
+        noiseDisplacementSlider.onValueChanged.AddListener((val) => displacer.noiseDisplacement = val);
     }
+
     public void SetupVRAttractorDemo()
     {
         if (objectA == null) { SpawnObjectA(); }
@@ -243,6 +268,8 @@ public class DemoManager : MonoBehaviour
 
         rightControllerattractionForceSlider.onValueChanged.AddListener((value) => rightControllerattractionForce = value);
         leftControllerattractionForceSlider.onValueChanged.AddListener((value) => leftControllerattractionForce = value);
+        rightControllerattractionForceSlider.value = rightControllerattractionForce;
+        leftControllerattractionForceSlider.value= leftControllerattractionForce;
 
         vrAttractionRoutine = StartCoroutine(VRAttractionEffect());
     }
@@ -269,11 +296,11 @@ public class DemoManager : MonoBehaviour
     #region Helper Functions
     public void SpawnObjectA()
     {
-        if (objectA == null) { objectA = SpawnObject("Object A", new Vector3(-0.5f, 0f, 1f), Color.red); }
+        if (objectA == null) { objectA = SpawnObject("Object A", new Vector3(-1f, 0f, 2f), Color.red); }
     }
     public void SpawnObjectB()
     {
-        if (objectB == null) { objectB = SpawnObject("Object B", new Vector3(0.5f, 0f, 1f), Color.blue); }
+        if (objectB == null) { objectB = SpawnObject("Object B", new Vector3(1f, 0f, 2f), Color.blue); }
     }
     private GameObject SpawnObject(string name, Vector3 offset, Color color)
     {
@@ -293,9 +320,9 @@ public class DemoManager : MonoBehaviour
         trail.material = TrailMat;
         trail.startColor = color;
         trail.endColor = color;
-        trail.startWidth = 0.05f;
-        trail.endWidth = 0.05f;
-        trail.time = 1f;
+        trail.startWidth = 0.01f;
+        trail.endWidth = 0.01f;
+        trail.time = 3f;
 
         obj.GetComponent<Renderer>().material.color = color;
 

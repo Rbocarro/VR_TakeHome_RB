@@ -1,16 +1,15 @@
 using UnityEngine;
 
-public class AutoRotator : MonoBehaviour
+namespace Demo.Utility
 {
-    [SerializeField, Range(0, 100f)]
-    public float rotationSpeed = 45f; // degrees per second
-    public bool isActive = true;
-
-    void Update()
+    public class AutoRotator : MonoBehaviour
     {
-        if (isActive)
+        [SerializeField, Range(0, 100f)]
+        public float rotationSpeed = 45f; // degrees per second
+        public bool isActive = true;
+        void Update()
         {
-            transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
+            if (isActive) { transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime); }
         }
     }
 }

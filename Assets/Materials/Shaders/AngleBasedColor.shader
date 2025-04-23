@@ -2,56 +2,64 @@ Shader "Unlit/AngleBasedColor"
 {
     Properties
     {
-        _BaseColor ("Base Color", Color) = (1, 1, 1, 1)
-        _TargetColor ("Target Color", Color) = (1, 0, 0, 1)
-        _DotProduct ("Dot Product", Range(-1, 1)) = 0
+        _Color ("Flat Color", Color) = (1, 0.5, 0.2, 1)
+        _DispTex ("Displacement Texture", 2D) = "gray" {}
+        _Displacement ("Displacement Amount", Range(0, 1.0)) = 0.1
+        _NoiseScale ("Noise UV Scale", Float) = 1.0
+        _ScrollSpeed ("Scroll Speed", Float) = 1.0
     }
+
     SubShader
     {
         Tags { "RenderType"="Opaque" }
-        LOD 100
+        LOD 200
 
-        Pass
+        HLSLPROGRAM
+        #pragma vertex vert
+        #pragma fragment frag
+
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+        struct Attributes
         {
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
+            float4 positionOS : POSITION;
+            float3 normalOS : NORMAL;
+            float2 uv : TEXCOORD0;
+        };
 
-            #include "UnityCG.cginc"
+        struct Varyings
+        {
+            float4 positionHCS : SV_POSITION;
+        };
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                UNITY_VERTEX_INPUT_INSTANCE_ID //Insert
-            };
+        CBUFFER_START(UnityPerMaterial)
+            float4 _Color;
+            TEXTURE2D(_DispTex);
+            SAMPLER(sampler_DispTex);
+            float _Displacement;
+            float _NoiseScale;
+            float _ScrollSpeed;
+        CBUFFER_END
 
-            struct v2f
-            {
-                float4 vertex : SV_POSITION;
-                UNITY_VERTEX_OUTPUT_STEREO //Insert
-                //docs.unity3d.com/Manual/SinglePassInstancing.html
-            };
+        Varyings vert(Attributes IN)
+        {
+            Varyings OUT;
 
-            fixed4 _BaseColor;
-            fixed4 _TargetColor;
-            float _DotProduct;
+            float2 scrolledUV = IN.uv * _NoiseScale + float2(_Time.y * _ScrollSpeed, 0);
+            float displacement = SAMPLE_TEXTURE2D(_DispTex, sampler_DispTex, scrolledUV).r;
 
-            v2f vert (appdata v)
-            {
-                v2f o;
-                UNITY_SETUP_INSTANCE_ID(v); //Insert
-                UNITY_INITIALIZE_OUTPUT(v2f, o); //Insert
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o); //Insert
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                return o;
-            }
+            float3 displacedVertex = IN.positionOS.xyz + IN.normalOS * displacement * _Displacement;
+            OUT.positionHCS = TransformObjectToHClip(float4(displacedVertex, 1.0));
 
-            fixed4 frag (v2f i) : SV_Target
-            {
-                fixed4 col = lerp(_TargetColor, _BaseColor, saturate((_DotProduct + 1) / 2.0));
-                return col;
-            }
-            ENDHLSL
+            return OUT;
         }
+
+        half4 frag(Varyings IN) : SV_Target
+        {
+            return _Color;
+        }
+        ENDHLSL
     }
+    FallBack "Diffuse"
 }
