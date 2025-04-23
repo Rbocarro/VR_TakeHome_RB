@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.XR.Interaction.Toolkit.Inputs;
+using Unity.XR.CoreUtils;
 using Demo.Utility;
 using Demo.VertexAnimation;
 using Demo.LissajousAnimation;
@@ -20,7 +18,7 @@ public class DemoManager : MonoBehaviour
 
     [Header("Lissajous Demo Settings")]
     public GameObject LissajousPanel;
-    public Material lissajousTrailMaterial;//default placeholder trail material for LJ demo
+    public Material lissajousTrailMaterial;
     public LissajousUIBindings objectAUI;
     public LissajousUIBindings objectBUI;
 
@@ -34,7 +32,6 @@ public class DemoManager : MonoBehaviour
     public GameObject colorChangePanel;
     private Coroutine colorChangeRoutine;
     
-
     [Header("Vertex Animation Demo Settings")]
     public GameObject vertexAnimationPanel;
     public Slider noiseScrollSpeedSlider;
@@ -46,10 +43,8 @@ public class DemoManager : MonoBehaviour
     public GameObject vrAttractorSidePanel;
     public VRAttractorHandler vrAttractorHandler;
     private Coroutine vrAttractionRoutine;
-
     private void Start()
     {
-        
         ToggleAllPanels(false);//set all side panels active status to false at start
     }
     public void SetupLissajousDemo()
@@ -112,10 +107,6 @@ public class DemoManager : MonoBehaviour
 
         objectRotationDemoHandler.Initialise(objectA, objectB);
 
-        objectRotationDemoHandler.angularSpeedSlider.onValueChanged.AddListener((value) => objectRotationDemoHandler.angularSpeed = value);
-        objectRotationDemoHandler.angularSpeedSlider.value=objectRotationDemoHandler.angularSpeed;
-        
-
         // Move objectA to be directly in front of the camera
         var xrOrigin = GetComponent<XROrigin>();
         var cameraTransform = xrOrigin.Camera.transform;
@@ -154,9 +145,6 @@ public class DemoManager : MonoBehaviour
         var objectArenderer = objectA.GetComponent<Renderer>();
         objectArenderer.material = new Material(colorChangeHandler.colorChangeMaterial);
 
-        colorChangeHandler.rotationSpeedSlider.onValueChanged.AddListener((value) => colorChangeHandler.rotationSpeed = value);
-        colorChangeHandler.rotationSpeedSlider.value = colorChangeHandler.rotationSpeed;
-
         // Start coroutine
         colorChangeRoutine = StartCoroutine(colorChangeHandler.ColorChangeEffect());
     }
@@ -175,7 +163,6 @@ public class DemoManager : MonoBehaviour
 
         // Stop other routines
         StopAllCoroutines();
-
         // Position Object A in center of view
         var xrOrigin = GetComponent<XROrigin>();
         objectA.transform.position = xrOrigin.Camera.transform.position + xrOrigin.Camera.transform.forward * 2f;
@@ -218,14 +205,8 @@ public class DemoManager : MonoBehaviour
         objectB.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
         objectB.GetComponent<Renderer>().material.color = Color.blue;
 
-        // Move objectA to be directly in front of the camera
-        vrAttractorHandler.Initialise(objectA, objectB);
-        ResetVRAttractionDemo();
-
-        vrAttractorHandler.rightControllerattractionForceSlider.onValueChanged.AddListener((value) => vrAttractorHandler.rightControllerattractionForce = value);
-        vrAttractorHandler.leftControllerattractionForceSlider.onValueChanged.AddListener((value) => vrAttractorHandler.leftControllerattractionForce = value);
-        vrAttractorHandler.rightControllerattractionForceSlider.value = vrAttractorHandler.rightControllerattractionForce;
-        vrAttractorHandler.leftControllerattractionForceSlider.value= vrAttractorHandler.leftControllerattractionForce;
+        vrAttractorHandler.Initialise(objectA, objectB,GetComponent<XROrigin>());
+        vrAttractorHandler.ResetVRAttractionDemo();
 
         vrAttractionRoutine = StartCoroutine(vrAttractorHandler.VRAttractionEffect());
     }
@@ -291,12 +272,9 @@ public class DemoManager : MonoBehaviour
         colorChangePanel.SetActive(active);
         vrAttractorSidePanel.SetActive(active);
     }
-    public void ResetVRAttractionDemo()
+    public void ResetVRAttractionDemoViaUI()
     {
-        var xrOrigin = GetComponent<XROrigin>();
-        var camTransform = xrOrigin.Camera.transform;
-        objectA.transform.position = camTransform.position + (camTransform.forward * 0.3f) + (camTransform.right * -.3f) + (camTransform.up * 0);
-        objectB.transform.position = camTransform.position + (camTransform.forward * 0.3f) + (camTransform.right * .3f) + (camTransform.up * 0);
+        vrAttractorHandler.ResetVRAttractionDemo();
     }
     #endregion
 }

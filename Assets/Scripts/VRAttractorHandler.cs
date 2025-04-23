@@ -17,11 +17,19 @@ namespace Demo.VRAttractor
 
         private GameObject objectA;
         private GameObject objectB;
+        private XROrigin xrOrigin;
 
-        public void Initialise(GameObject a, GameObject b)
+        public void Initialise(GameObject a, GameObject b,XROrigin xROrigin)
         {
             objectA = a;
             objectB = b;
+            xrOrigin = xROrigin;
+
+            //bind sliders
+            rightControllerattractionForceSlider.onValueChanged.AddListener((value) => rightControllerattractionForce = value);
+            leftControllerattractionForceSlider.onValueChanged.AddListener((value) => leftControllerattractionForce = value);
+            rightControllerattractionForceSlider.value = rightControllerattractionForce;
+            leftControllerattractionForceSlider.value = leftControllerattractionForce;
         }
         public IEnumerator<WaitForEndOfFrame> VRAttractionEffect()
         {
@@ -38,6 +46,13 @@ namespace Demo.VRAttractor
                 }
                 yield return null;
             }
+        }
+
+        public void ResetVRAttractionDemo()
+        {
+            var camTransform = xrOrigin.Camera.transform;
+            objectA.transform.position = camTransform.position + (camTransform.forward * 0.3f) + (camTransform.right * -.3f) + (camTransform.up * 0);
+            objectB.transform.position = camTransform.position + (camTransform.forward * 0.3f) + (camTransform.right * .3f) + (camTransform.up * 0);
         }
     }
 }

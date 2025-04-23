@@ -19,7 +19,6 @@ namespace Demo.VertexAnimation
         private Vector3[] displacedVertices;
         private Vector3[] normals;
         private float noiseOffset;
-
         void Start()
         {
             mesh = GetComponent<MeshFilter>().mesh;

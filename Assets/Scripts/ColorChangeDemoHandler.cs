@@ -1,4 +1,3 @@
-using Unity.XR.CoreUtils;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,6 +19,9 @@ namespace Demo.ColorChange
             objectA = a;
             objectB = b;
             //xrOrigin = origin;
+
+            rotationSpeedSlider.onValueChanged.AddListener((value) => rotationSpeed = value);
+            rotationSpeedSlider.value = rotationSpeed;
         }
 
         public IEnumerator<WaitForEndOfFrame> ColorChangeEffect()
@@ -44,6 +46,11 @@ namespace Demo.ColorChange
 
                 yield return null;
             }
+        }
+
+        public void RemoveAllListeners()
+        {
+            rotationSpeedSlider.onValueChanged.RemoveAllListeners();
         }
 
     }
