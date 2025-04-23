@@ -29,8 +29,9 @@ public class DemoManager : MonoBehaviour
     private Coroutine rotationRoutine;
 
     [Header("Color Change Demo Settings")]
-    public float rotationSpeed;             //rotation speed of obj B around A
     public GameObject colorChangePanel;
+    public float rotationSpeed;             //rotation speed of obj B around A
+    public Slider rotationSpeedSlider;
     public Material colorChangeMaterial;
     private Coroutine colorChangeRoutine;
 
@@ -39,6 +40,7 @@ public class DemoManager : MonoBehaviour
     public Slider noiseScrollSpeedSlider;
     public Slider noiseScaleSlider;
     public Slider noiseDisplacementSlider;
+    public Material VertexAnimationMaterial;
     private Coroutine vertexDisplacementRoutine;
 
     [Header("VR Attractor Settings")]
@@ -53,15 +55,8 @@ public class DemoManager : MonoBehaviour
 
     private void Start()
     {
-        //set all side panels active status to false at start
-        ToggleAllPanels(false);
-
-        //get reference to L and R controller positions
-        leftController = GetComponent<XRInputModalityManager>().leftController.transform;
-        rightController= GetComponent<XRInputModalityManager>().rightController.transform;
-
-        //debug
         
+        ToggleAllPanels(false);//set all side panels active status to false at start
     }
     public void SetupLissajousDemo()
     {
@@ -72,16 +67,20 @@ public class DemoManager : MonoBehaviour
         if (objectB == null) {  SpawnObjectB(); }
 
         var xrOrigin = GetComponent<XROrigin>();
-        objectA.transform.position = xrOrigin.Camera.transform.position + new Vector3(-0.5f, 0f, 0.5f);
-        objectB.transform.position = xrOrigin.Camera.transform.position + new Vector3(0.5f, 0f, 0.5f);
+        objectA.transform.position = xrOrigin.Camera.transform.position + new Vector3(-0.5f, 0f, 1f);
+        objectB.transform.position = xrOrigin.Camera.transform.position + new Vector3(0.5f, 0f, 1f);
 
         // Stop other coroutines
-        //if (rotationRoutine != null) StopCoroutine(rotationRoutine);
-        //if (colorChangeRoutine != null) StopCoroutine(colorChangeRoutine);
         StopAllCoroutines();
 
         DisableAutoRotation(objectA);
         DisableAutoRotation(objectB);
+
+        if (objectA.GetComponent<VertexDisplacement>() != null)
+        {
+            objectA.GetComponent<VertexDisplacement>().enabled = false;
+        }
+        
 
         objectA.GetComponent<LissajousMovement>().enabled=true;
         objectB.GetComponent<LissajousMovement>().enabled = true;
@@ -106,13 +105,18 @@ public class DemoManager : MonoBehaviour
         objectB.GetComponent<TrailRenderer>().enabled= false;
         objectA.GetComponent<LissajousMovement>().enabled = false;
         objectB.GetComponent<LissajousMovement>().enabled = false;
+
+        if (objectA.GetComponent<VertexDisplacement>() != null)
+        {
+            objectA.GetComponent<VertexDisplacement>().enabled = false;
+        }
         objectA.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
         objectA.GetComponent<Renderer>().material.color=Color.red;
         objectB.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
         objectB.GetComponent<Renderer>().material.color = Color.blue;
 
-
         angularSpeedSlider.onValueChanged.AddListener((value) => angularSpeed = value);
+        angularSpeedSlider.value=angularSpeed;
         
 
         // Move objectA to be directly in front of the camera
@@ -148,7 +152,7 @@ public class DemoManager : MonoBehaviour
                 float angleDiff = Quaternion.Angle(objectA.transform.rotation, targetRotation);
                 if (angleDiff < 1f) break;
 
-                yield return new WaitForEndOfFrame();
+                yield return null;
             }
 
         }
@@ -169,21 +173,24 @@ public class DemoManager : MonoBehaviour
         objectB.GetComponent<LissajousMovement>().enabled = false;
         objectA.GetComponent<TrailRenderer>().enabled = false;
         objectB.GetComponent<TrailRenderer>().enabled = false;
-
+        if (objectA.GetComponent<VertexDisplacement>() != null)
+        {
+            objectA.GetComponent<VertexDisplacement>().enabled = false;
+        }
         // Center obj A and point it to the right
         var xrOrigin = GetComponent<XROrigin>();
         objectA.transform.position = xrOrigin.Camera.transform.position + xrOrigin.Camera.transform.forward * 1f;
         objectA.transform.rotation = Quaternion.LookRotation(Vector3.right, Vector3.up);
 
         // Apply the material with the shader
-        var renderer = objectA.GetComponent<Renderer>();
-        renderer.material = new Material(colorChangeMaterial);
+        var objectArenderer = objectA.GetComponent<Renderer>();
+        objectArenderer.material = new Material(colorChangeMaterial);
 
+        rotationSpeedSlider.onValueChanged.AddListener((value) => rotationSpeed = value);
+        rotationSpeedSlider.value = rotationSpeed;
 
         // Start coroutine
         colorChangeRoutine = StartCoroutine(ColorChangeEffect());
-
-
     }
     private IEnumerator<WaitForEndOfFrame> ColorChangeEffect()
     {
@@ -193,26 +200,19 @@ public class DemoManager : MonoBehaviour
 
         while (true)
         {
-            angle += Time.deltaTime * 1.5f;
+            angle += Time.deltaTime * rotationSpeed;
             float x = Mathf.Cos(angle) * radius;
             float y = Mathf.Sin(angle) * radius;
 
-            // Arc between +Z and -Z (semicircle)
+            //spin arond the Z axis
             objectB.transform.position = objectA.transform.position + new Vector3(x, y, 0);
-
-            //Vector3 dirToA = (objectA.transform.position - objectB.transform.position).normalized;
-            //if (dirToA.sqrMagnitude > 0f)
-            //{
-            //    Quaternion targetRot = Quaternion.LookRotation(dirToA, Vector3.up);
-            //    objectB.transform.rotation = Quaternion.Slerp(objectB.transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
-            //}
 
             // Update dot product and send it to shader
             Vector3 dirToB = (objectB.transform.position - objectA.transform.position).normalized;
             float dot = Vector3.Dot(objectA.transform.forward, dirToB);
             mat.SetFloat("_DotProduct", dot);
 
-            yield return new WaitForEndOfFrame();
+            yield return null;
         }
     }
     public void SetupVertexAnimationDemo()
@@ -221,12 +221,20 @@ public class DemoManager : MonoBehaviour
         if (objectB != null) objectB.transform.position=new Vector3(0,-100f,0);// move object B out of view
         TogglePanels(vertexAnimationPanel);
 
+        DisableAutoRotation(objectA);
+        DisableAutoRotation(objectB);
+        objectA.GetComponent<TrailRenderer>().enabled = false;
+        objectB.GetComponent<TrailRenderer>().enabled = false;
+        objectA.GetComponent<LissajousMovement>().enabled = false;
+        objectB.GetComponent<LissajousMovement>().enabled = false;
+
         // Stop other routines
         StopAllCoroutines();
 
         // Position Object A in center of view
         var xrOrigin = GetComponent<XROrigin>();
         objectA.transform.position = xrOrigin.Camera.transform.position + xrOrigin.Camera.transform.forward * 2f;
+        objectA.GetComponent<Renderer>().material = VertexAnimationMaterial;
 
         //Make sure the object has a VertexDisplacement component
         var displacer = objectA.GetComponent<VertexDisplacement>();
@@ -242,7 +250,6 @@ public class DemoManager : MonoBehaviour
         noiseScaleSlider.onValueChanged.AddListener((val) => displacer.noiseScale = val);
         noiseDisplacementSlider.onValueChanged.AddListener((val) => displacer.noiseDisplacement = val);
     }
-
     public void SetupVRAttractorDemo()
     {
         if (objectA == null) { SpawnObjectA(); }
@@ -259,12 +266,15 @@ public class DemoManager : MonoBehaviour
         objectB.GetComponent<LissajousMovement>().enabled = false;
         objectA.GetComponent<TrailRenderer>().enabled = false;
         objectB.GetComponent<TrailRenderer>().enabled = false;
+        if (objectA.GetComponent<VertexDisplacement>() != null) {   objectA.GetComponent<VertexDisplacement>().enabled = false; }
+
+        objectA.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
+        objectA.GetComponent<Renderer>().material.color = Color.red;
+        objectB.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
+        objectB.GetComponent<Renderer>().material.color = Color.blue;
 
         // Move objectA to be directly in front of the camera
-        var xrOrigin = GetComponent<XROrigin>();
-        var camTransform = xrOrigin.Camera.transform;
-        objectA.transform.position = camTransform.position + camTransform.forward * 0.5f;
-        objectB.transform.position = camTransform.position + camTransform.forward * 0.5f;
+        ResetVRAttractionDemo();
 
         rightControllerattractionForceSlider.onValueChanged.AddListener((value) => rightControllerattractionForce = value);
         leftControllerattractionForceSlider.onValueChanged.AddListener((value) => leftControllerattractionForce = value);
@@ -275,32 +285,32 @@ public class DemoManager : MonoBehaviour
     }
     private IEnumerator<WaitForEndOfFrame> VRAttractionEffect()
     {
-        float ttractionRadius=0.3f;
-        
+        float attractionRadius=0.4f;
+
         while (true)
         {   
 
-            //Attract obj A or B to their respective controllers if they are within 
-            if(Vector3.Distance(objectA.transform.position,rightController.position)<=ttractionRadius)
+            //Attract obj A or B to their respective controllers if they are within distance
+            if(Vector3.Distance(objectA.transform.position,rightController.position) < attractionRadius)
             {
                 objectA.transform.position = Vector3.Lerp(objectA.transform.position, rightController.transform.position, rightControllerattractionForce * Time.deltaTime);
             }
-            if (Vector3.Distance(objectB.transform.position, leftController.position) <= ttractionRadius)
+            if (Vector3.Distance(objectB.transform.position, leftController.position) <= attractionRadius)
             {
                 objectB.transform.position = Vector3.Lerp(objectB.transform.position, leftController.transform.position, leftControllerattractionForce * Time.deltaTime);
             }
-            yield return new WaitForEndOfFrame();
+            yield return null;
         }
     }
 
     #region Helper Functions
     public void SpawnObjectA()
     {
-        if (objectA == null) { objectA = SpawnObject("Object A", new Vector3(-1f, 0f, 2f), Color.red); }
+        if (objectA == null) { objectA = SpawnObject("Object A", new Vector3(-0.4f, 0f, 1f), Color.red); }
     }
     public void SpawnObjectB()
     {
-        if (objectB == null) { objectB = SpawnObject("Object B", new Vector3(1f, 0f, 2f), Color.blue); }
+        if (objectB == null) { objectB = SpawnObject("Object B", new Vector3(0.4f, 0f, 1f), Color.blue); }
     }
     private GameObject SpawnObject(string name, Vector3 offset, Color color)
     {
@@ -354,6 +364,15 @@ public class DemoManager : MonoBehaviour
         vertexAnimationPanel.SetActive(active);
         colorChangePanel.SetActive(active);
         vrAttractorSidePanel.SetActive(active);
+    }
+
+    public void ResetVRAttractionDemo()
+    {
+        var xrOrigin = GetComponent<XROrigin>();
+        var camTransform = xrOrigin.Camera.transform;
+        objectA.transform.position = camTransform.position + (camTransform.forward * 0.3f) + (camTransform.right * -.3f) + (camTransform.up * 0);
+        objectB.transform.position = camTransform.position + (camTransform.forward * 0.3f) + (camTransform.right * .3f) + (camTransform.up * 0);
+        
     }
     #endregion
 }
