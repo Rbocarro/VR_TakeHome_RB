@@ -55,17 +55,17 @@ This script takes the dot product of the forward vector of object and and the di
 + https://docs.unity3d.com/Manual/SinglePassInstancing.html
 
 ## Mesh Vertex Animation
-This script get reference to the mesh componet of and displaces its vertices using unity's Mathf.PerlinNoise() function with controllable parameters such as noise scale, displacement and scroll speed. 
+This script get reference to the mesh componet of and displaces its vertices using unity's Mathf.PerlinNoise() function with controllable parameters such as noise scale, displacement and scroll speed. A simple Fresnel shader is applied to the mesh to improve visibility.
 
 ## VR integration
-This script allows VR object attraction toward the user's left and right controllers within a defined radius. The user can use sliders to control the attraction force which allows it to smoothly or quickly interpolates object positions toward the controllers using Vector3.Lerp().
+This script allows VR object attraction toward the user's left and right controllers within a defined radius. The user can use sliders to control the attraction force which allows it to smoothly or quickly interpolates object positions toward the controllers using Vector3.Lerp(). Addtionally each demo postions the demo objects infront of the VR camera's forward vector.
 
 ## Improvements
-This project could benefit from improvements such as cleaning up code structure to improve readability and better compartmentalised functions.
+If given more time, This project could benefit from improvements such as cleaning up code structure to improve readability and better compartmentalised functions.
 
 + The Procedural mesh generation only generates a UV sphere mesh which has uneven vetex distribution near the poles. there are other sphere apporximation meshes such as Icospheres and Cube spheres that can 
-+ The vetrex displacement can be implmented in the vertex shader which can offload the calculations to the GPU allowing for better perfromance. Additionally Using a precalculated Perlin Noise texture can also allow for a minor performance improvement especially on VR devices.
-+
++ The vetrex displacement can be implmented in a vertex shader which can offload the calculations to the GPU allowing for better perfromance. Additionally Using a precalculated Perlin Noise texture can also allow for a performance improvement especially on VR devices.
+
 
 
 
