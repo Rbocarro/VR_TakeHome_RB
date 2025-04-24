@@ -5701,13 +5701,13 @@ MonoBehaviour:
     ResetButton: {fileID: 1466955308}
   objectRotationPanel: {fileID: 1780651298}
   objectRotationDemoHandler:
-    angularSpeed: 0
+    angularSpeed: 300
     radiusAroundObjectA: 0.69
     angularSpeedSlider: {fileID: 1387390675}
   colorChangeHandler:
     rotationSpeedSlider: {fileID: 1502283672}
     colorChangeMaterial: {fileID: 2100000, guid: 8b63181248745eb4d989c13ce8cd10dd, type: 2}
-    rotationSpeed: 0
+    rotationSpeed: 5
   colorChangePanel: {fileID: 1960658694}
   vertexAnimationPanel: {fileID: 547078574}
   noiseScrollSpeedSlider: {fileID: 1689814018}
