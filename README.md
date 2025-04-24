@@ -15,7 +15,8 @@ https://www.youtube.com/watch?v=vpM1LpFZr8U
 
    ```
 2. Open the project in Unity 6000.0.33f1 or later with URP enabled
-3. Load the Demo scene in: Assets/Scenes/DemoScene.unity
+3. Ensure the Unity VR Featureset is installed from Package Manager > Unity Registry > VR, and click install. This should install the XR Interaction Toolkit, OpenXR plugin and Occulus XR Plugin.
+4. Load the Demo scene in: Assets/Scenes/DemoScene.unity
 
 
 
