@@ -49,7 +49,7 @@ This was implemented by randomly placing Object B around object A along a given 
 
 
 ## Color Change Based on Angle
-This script takes the dot product of the forward vector of object A and and the direction from it to object B which orbits around A. This is then sent to an simple unlit HLSL shader wich interpolates the color in the fragment shader. there were some rendering issues when writing this shader related to URL and how it handels single and multi pass instancing.This was remedied by adding some macros to the shader.
+This script takes the dot product of the forward vector of object A and and the direction from it to object B which orbits around A. This is then sent to an simple unlit HLSL shader wich interpolates the color in the fragment shader. there were some rendering issues when writing this shader related to URP and how it handels single and multi pass instancing.This was remedied by adding some macros to the shader.
 
 #### References used:
 + https://www.youtube.com/watch?v=JiCJN8EvoCA
