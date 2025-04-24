@@ -14,19 +14,17 @@ https://www.youtube.com/watch?v=vpM1LpFZr8U
    git clone https://github.com/Rbocarro/VR_TakeHome_RB
 
    ```
-2. Open the project in Unity 6000.0.33f1 or later with URP enabled
-3. Ensure the Unity VR Featureset is installed from Package Manager > Unity Registry > VR, and click install. This should install the XR Interaction Toolkit, OpenXR plugin and Occulus XR Plugin.
+2. Open the project in Unity **6000.0.33f1** or later with URP enabled
+3. If there are any package dependency issues, Ensure the [Unity VR Featureset](https://docs.unity3d.com/6000.0/Documentation/Manual/VRFeature.html) is installed from Package Manager > Unity Registry > VR, and click install. This should install the XR Interaction Toolkit, OpenXR plugin, Oculus XR Plugin and any other related dependancies.
 4. Load the Demo scene in: Assets/Scenes/DemoScene.unity
-
-
 
 # Implementation
 
 This project was built in Unity 6 using URP with the Occulus XR plugin and XR interaction toolkit which comes with an XR rig prefab.
-The core functionality consists of a DemoManager component attached to the XR rig which controls all of the individual demo components using coroutines or toggling induvidual components when needed. VR interactions were tested using an Occulus Quest 2. Parameters of each indivdual demo can be tweaked either in the Inspector or using the UI panel attached to the left controller.
+The core functionality consists of a DemoManager component attached to the XR rig which controls all of the individual demo components using coroutines or toggling induvidual components when needed. VR interactions were tested using an Occulus Quest 2. Parameters of each indivdual demo can be tweaked either in the Inspector at the DemoManager component or using the UI panel attached to the left controller.
 
 ## Procedural Mesh Creation
-This script procedurally generates a UV sphere gameobject(Object A) and a cone mesh as its child pointing in the forward direction. It creates vertices and triangles based on configurable parameters such as resolution and size and assigns it a red material.
+This script procedurally generates a UV sphere gameobject(Object A) and a cone mesh as its child pointing in the forward direction. It creates vertices and triangles based on configurable parameters found in the inspector such as resolution and size and assigns it a red material.
 
 #### References used:
 https://danielsieger.com/blog/2021/03/27/generating-spheres.html
