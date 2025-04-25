@@ -10,6 +10,7 @@ namespace Demo.ColorChange
         public Material colorChangeMaterial;
 
         public float rotationSpeed;
+        public float rotationRadius;//orbit radius around A
         private GameObject objectA;
         private GameObject objectB;
         //private XROrigin xrOrigin;
@@ -27,14 +28,13 @@ namespace Demo.ColorChange
         public IEnumerator<WaitForEndOfFrame> ColorChangeEffect()
         {
             float angle = 0f;
-            float radius = 0.7f;//orbit radius around A
             var mat = objectA.GetComponent<Renderer>().material;//obj A material instance
 
             while (true)
             {
                 angle += Time.deltaTime * rotationSpeed;
-                float x = Mathf.Cos(angle) * radius;    //horizontal pos
-                float y = Mathf.Sin(angle) * radius;    //vertical pos
+                float x = Mathf.Cos(angle) * rotationRadius;    //horizontal pos
+                float y = Mathf.Sin(angle) * rotationRadius;    //vertical pos
 
                 //spin arond the Z axis
                 objectB.transform.position = objectA.transform.position + new Vector3(x, y, 0);

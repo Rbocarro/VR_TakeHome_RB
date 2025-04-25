@@ -43,24 +43,48 @@ public class DemoManager : MonoBehaviour
     public GameObject vrAttractorSidePanel;
     public VRAttractorHandler vrAttractorHandler;
     private Coroutine vrAttractionRoutine;
+
+    private Transform sceneCameraTransform;     //camera transform for either VR and Non VR mode
+    private bool inVRMode;                      //bool to indicate whether the scene is in VR mode
     private void Start()
     {
-        ToggleAllPanels(false);//set all side panels active status to false at start
+        ToggleAllPanels(false);                 //set all side panels active status to false at start
+        //SetupUIListners();                    //set up UI Listners for all demos
+
+        // Check to see if in VR scene 
+        if (TryGetComponent<XROrigin>(out XROrigin xrOrigin))
+        {
+            sceneCameraTransform = xrOrigin.Camera.transform;
+            inVRMode = true;
+        }
+        else
+        {
+            sceneCameraTransform = GetComponent<Camera>().transform;
+            inVRMode=false;
+            Debug.Log("Not in VR mode");    
+        }
     }
     public void SetupLissajousDemo()
     {
         // Deactivate other panels
         TogglePanels(LissajousPanel);
 
-        if (objectA == null) {  SpawnObjectA(); }
-        if (objectB == null) {  SpawnObjectB(); }
-
-        var xrOrigin = GetComponent<XROrigin>();
-        objectA.transform.position = xrOrigin.Camera.transform.position + new Vector3(-0.5f, 0f, 1f);
-        objectB.transform.position = xrOrigin.Camera.transform.position + new Vector3(0.5f, 0f, 1f);
-
         // Stop other coroutines
         StopAllCoroutines();
+
+        if (objectA == null) {  SpawnObjectA(); }
+        if (objectB == null) {  SpawnObjectB(); }
+;
+        if (inVRMode)
+        {
+            objectA.transform.position = sceneCameraTransform.position + new Vector3(-0.5f, 0f, 1f);
+            objectB.transform.position = sceneCameraTransform.position + new Vector3(0.5f, 0f, 1f);
+        }
+        else
+        {
+            objectA.transform.position = sceneCameraTransform.position + new Vector3(-5f, 0f, 5f);
+            objectB.transform.position = sceneCameraTransform.position + new Vector3(5f, 0f, 5f);
+        }
 
         DisableAutoRotation(objectA);
         DisableAutoRotation(objectB);
@@ -81,13 +105,14 @@ public class DemoManager : MonoBehaviour
     }
     public void SetupObjectRotationDemo()
     {
-        if (objectA == null) { SpawnObjectA(); }
-        if (objectB == null) { SpawnObjectB(); }
         // Deactivate other panels
         TogglePanels(objectRotationPanel);
 
-        // Stop other routines
+        // Stop other coroutines
         StopAllCoroutines();
+
+        if (objectA == null) { SpawnObjectA(); }
+        if (objectB == null) { SpawnObjectB(); }
         
         DisableAutoRotation(objectA);
         DisableAutoRotation(objectB);
@@ -107,10 +132,15 @@ public class DemoManager : MonoBehaviour
 
         objectRotationDemoHandler.Initialise(objectA, objectB);
 
-        // Move objectA to be directly in front of the camera
-        var xrOrigin = GetComponent<XROrigin>();
-        var cameraTransform = xrOrigin.Camera.transform;
-        objectA.transform.position = cameraTransform.position + cameraTransform.forward * 1f;
+        if (inVRMode)
+        {
+            objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * 1f;
+        }
+        else
+        {
+            objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * 5f;
+
+        }
 
         // Start coroutine
         rotationRoutine = StartCoroutine(objectRotationDemoHandler.RotateTowardsMovingTarget());
@@ -136,9 +166,17 @@ public class DemoManager : MonoBehaviour
             objectA.GetComponent<VertexDisplacement>().enabled = false;
         }
         // Center obj A and point it to the right
-        var xrOrigin = GetComponent<XROrigin>();
-        objectA.transform.position = xrOrigin.Camera.transform.position + xrOrigin.Camera.transform.forward * 1f;
-        objectA.transform.rotation = Quaternion.LookRotation(Vector3.right, Vector3.up);
+
+        if (inVRMode)
+        {
+            objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * 1f;
+        }
+        else
+        {
+            objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * 5f;
+        }
+        
+        objectA.transform.rotation = Quaternion.LookRotation(sceneCameraTransform.right, Vector3.up);
 
         colorChangeHandler.Initialise(objectA, objectB);
         // Apply the material with the shader
@@ -163,15 +201,18 @@ public class DemoManager : MonoBehaviour
 
         // Stop other routines
         StopAllCoroutines();
-        // Position Object A in center of view
-        var xrOrigin = GetComponent<XROrigin>();
-        objectA.transform.position = xrOrigin.Camera.transform.position + xrOrigin.Camera.transform.forward * 2f;
+
+        // Position Object A in center of view  2f for VR mode 7f for nonVR mode
+        float offset = inVRMode ? 2f : 7f;
+        objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * offset;
+
         objectA.GetComponent<Renderer>().material = VertexAnimationMaterial;
 
         //Make sure the object has a VertexDisplacement component
-        var displacer = objectA.GetComponent<VertexDisplacement>();
-        if (displacer == null)
+        if (!objectA.TryGetComponent<VertexDisplacement>(out var displacer))
+        {
             displacer = objectA.AddComponent<VertexDisplacement>();
+        }
 
         // Sync sliders to values and setup UI bindings
         noiseScrollSpeedSlider.value = displacer.scrollSpeed;
@@ -213,33 +254,34 @@ public class DemoManager : MonoBehaviour
     #region Helper Functions
     public void SpawnObjectA()
     {
-        if (objectA == null) { objectA = SpawnObject("Object A", new Vector3(-0.4f, 0f, 1f), Color.red); }
+        if (objectA == null) 
+        {
+            Vector3 position = inVRMode ? new Vector3(-0.4f, 0f, 1f) : new Vector3(-4f, 0f, 5f);
+            objectA = SpawnObject("Object A", position, Color.red);
+        }
     }
     public void SpawnObjectB()
     {
-        if (objectB == null) { objectB = SpawnObject("Object B", new Vector3(0.4f, 0f, 1f), Color.blue); }
+        if (objectB == null) 
+        {
+            Vector3 position = inVRMode ? new Vector3(0.4f, 0f, 1f) : new Vector3(4f, 0f, 5f);//Postion object based on wether in VR mode or not
+            objectB = SpawnObject("Object B", position, Color.blue); 
+        }
     }
     private GameObject SpawnObject(string name, Vector3 offset, Color color)
     {
         GameObject obj = proceduralMeshGenerator.GenerateDemoGameobject(name);
-        var camTransform = GetComponent<XROrigin>().Camera.transform;
+        // var camTransform = GetComponent<XROrigin>().Camera.transform;
 
-        obj.transform.position = camTransform.position + (camTransform.forward * offset.z) + (camTransform.right * offset.x) + (camTransform.up * offset.y);
+        //obj.transform.position = camTransform.position + (camTransform.forward * offset.z) + (camTransform.right * offset.x) + (camTransform.up * offset.y);
+        obj.transform.position = sceneCameraTransform.transform.position + (sceneCameraTransform.forward * offset.z) + (sceneCameraTransform.right * offset.x) + (sceneCameraTransform.up * offset.y);
         //obj.transform.SetParent(transform);
 
         obj.AddComponent<LissajousMovement>();
         obj.GetComponent<LissajousMovement>().enabled = false;
 
         // Trail renderer setup
-        var trail = obj.AddComponent<TrailRenderer>();
-        var TrailMat = new Material(lissajousTrailMaterial);
-        TrailMat.color = color;
-        trail.material = TrailMat;
-        trail.startColor = color;
-        trail.endColor = color;
-        trail.startWidth = 0.01f;
-        trail.endWidth = 0.01f;
-        trail.time = 3f;
+        SetupTrailRenderer(obj, color);
 
         obj.GetComponent<Renderer>().material.color = color;
 
@@ -252,10 +294,10 @@ public class DemoManager : MonoBehaviour
     }
     private void DisableAutoRotation(GameObject obj)
     {
-        var rotator = obj.GetComponent<AutoRotator>();
-        if (rotator != null)
+        //disable autorotation if enabled
+        if (obj.TryGetComponent<AutoRotator>(out var rotator))
         {
-            rotator.isActive = false;
+            rotator.isActive=false;
             obj.transform.rotation = Quaternion.identity;
         }
     }
@@ -275,6 +317,25 @@ public class DemoManager : MonoBehaviour
     public void ResetVRAttractionDemoViaUI()
     {
         vrAttractorHandler.ResetVRAttractionDemo();
+    }
+
+    public void SetupTrailRenderer(GameObject gameObject,Color trailColor)
+    {
+        // Trail renderer setup
+        var trail = gameObject.AddComponent<TrailRenderer>();
+        trail.material = new Material(lissajousTrailMaterial) { color = trailColor };
+        trail.startWidth = trail.endWidth = 0.01f;
+        trail.time = 3f;
+    }
+
+    public void SetupUIListners()
+    {       
+        //TODO
+        //setup listners for all UI panel elements
+        //Lissajous
+        //Object Rotation
+        //Color Change
+        //
     }
     #endregion
 }
