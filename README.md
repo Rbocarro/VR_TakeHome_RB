@@ -4,9 +4,9 @@
 In this project I was tasked with developing a series of small demos consisting of procedural 3D mesh generation, animation, interaction with optional VR integration.
 
 # Project Video Demonstration
-[Non-VR Implementation- Youtube](https://www.youtube.com/watch?v=vpM1LpFZr8U)
+[VR Implementation- Youtube](https://www.youtube.com/watch?v=vpM1LpFZr8U)
 
-[VR Implementation- Youtube](https://www.youtube.com/watch?v=CG_MMXy7GYk)
+[Non-VR Implementation- Youtube](https://www.youtube.com/watch?v=CG_MMXy7GYk)
 
 
 # Setup Instructions
