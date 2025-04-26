@@ -24,12 +24,6 @@ namespace Demo.VRAttractor
             objectA = a;
             objectB = b;
             xrOrigin = xROrigin;
-
-            //bind sliders
-            rightControllerattractionForceSlider.onValueChanged.AddListener((value) => rightControllerattractionForce = value);
-            leftControllerattractionForceSlider.onValueChanged.AddListener((value) => leftControllerattractionForce = value);
-            rightControllerattractionForceSlider.value = rightControllerattractionForce;
-            leftControllerattractionForceSlider.value = leftControllerattractionForce;
         }
         public IEnumerator<WaitForEndOfFrame> VRAttractionEffect()
         {

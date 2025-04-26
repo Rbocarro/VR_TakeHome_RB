@@ -6,11 +6,11 @@ namespace Demo.VertexAnimation
     public class VertexDisplacement : MonoBehaviour
     {
         [Header("Noise Controls")]
-        [SerializeField, Range(0, 10f)]
+        [Range(0, 10f)]
         public float noiseScale = 1f;
-        [SerializeField, Range(0, 10f)]
+        [Range(0, 10f)]
         public float noiseDisplacement = 1f;
-        [SerializeField, Range(0, 3f)]
+        [Range(0, 3f)]
         public float scrollSpeed = 1.0f;
         public Material vertexAnimationMaterial;
 

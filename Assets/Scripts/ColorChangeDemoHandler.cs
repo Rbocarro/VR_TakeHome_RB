@@ -19,10 +19,6 @@ namespace Demo.ColorChange
         {
             objectA = a;
             objectB = b;
-            //xrOrigin = origin;
-
-            rotationSpeedSlider.onValueChanged.AddListener((value) => rotationSpeed = value);
-            rotationSpeedSlider.value = rotationSpeed;
         }
 
         public IEnumerator<WaitForEndOfFrame> ColorChangeEffect()

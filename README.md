@@ -6,7 +6,6 @@ In this project I was tasked with developing a series of small demos consisting 
 # Project Video Demonstration
 https://www.youtube.com/watch?v=vpM1LpFZr8U
 
-
 # Setup Instructions
 
 1. Clone the repo:
@@ -16,7 +15,8 @@ https://www.youtube.com/watch?v=vpM1LpFZr8U
    ```
 2. Open the project in Unity **6000.0.33f1** or later with URP enabled
 3. If there are any package dependency issues, Ensure the [Unity VR Featureset](https://docs.unity3d.com/6000.0/Documentation/Manual/VRFeature.html) is installed from Package Manager > Unity Registry > VR, and click install. This should install the XR Interaction Toolkit, OpenXR plugin, Oculus XR Plugin and any other related dependancies.
-4. Load the Demo scene in: Assets/Scenes/DemoScene.unity
+4. To Try the non VR demo Load the scene in: Assets/Scenes/DemoScene.unity
+5. To Try the  VR demo Load the scene in: Assets/Scenes/DemoScene_VR.unity
 5. Ensure a Compatible Quest VR headset and controllers are connected when playtesting.
 
 # Implementation

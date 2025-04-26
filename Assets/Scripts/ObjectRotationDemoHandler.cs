@@ -16,9 +16,6 @@ namespace Demo.ObjectRotation
         {
             objectA = a;
             objectB = b;
-
-            angularSpeedSlider.onValueChanged.AddListener((value) => angularSpeed = value);
-            angularSpeedSlider.value = angularSpeed;
         }
         public IEnumerator<WaitForEndOfFrame> RotateTowardsMovingTarget()
         {

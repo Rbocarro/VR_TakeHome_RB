@@ -10,8 +10,8 @@ using Demo.VRAttractor;
 public class DemoManager : MonoBehaviour
 {
     [Header("Demo GameObjects")]
-    public GameObject objectA;
-    public GameObject objectB;
+    public GameObject objectA;                  
+    public GameObject objectB;                 
 
     [Header("Procedural Mesh Settings")]
     public ProceduralMeshGenerator proceduralMeshGenerator;
@@ -19,8 +19,9 @@ public class DemoManager : MonoBehaviour
     [Header("Lissajous Demo Settings")]
     public GameObject LissajousPanel;
     public Material lissajousTrailMaterial;
-    public LissajousUIBindings objectAUI;
-    public LissajousUIBindings objectBUI;
+    public LissajousUIBindings objectAUI;       //Object A Lissajous UI Elements
+    public LissajousUIBindings objectBUI;       //Object B Lissajous UI Elements
+    private bool LissajousUIListenersSetUp = false;
 
     [Header("Object Rotation Demo Settings")]
     public GameObject objectRotationPanel;
@@ -38,6 +39,7 @@ public class DemoManager : MonoBehaviour
     public Slider noiseScaleSlider;
     public Slider noiseDisplacementSlider;
     public Material VertexAnimationMaterial;
+    private bool VertexAnimationListenersSetUp = false;
 
     [Header("VR Attractor Settings")]
     public GameObject vrAttractorSidePanel;
@@ -48,9 +50,9 @@ public class DemoManager : MonoBehaviour
     private bool inVRMode;                      //bool to indicate whether the scene is in VR mode
     private void Start()
     {
+        SetupUIListeners();                      //set up UI Listners for all demos
         ToggleAllPanels(false);                 //set all side panels active status to false at start
-        //SetupUIListners();                    //set up UI Listners for all demos
-
+        
         // Check to see if in VR scene 
         if (TryGetComponent<XROrigin>(out XROrigin xrOrigin))
         {
@@ -60,21 +62,26 @@ public class DemoManager : MonoBehaviour
         else
         {
             sceneCameraTransform = GetComponent<Camera>().transform;
-            inVRMode=false;
-            Debug.Log("Not in VR mode");    
+            inVRMode=false; 
         }
     }
     public void SetupLissajousDemo()
     {
-        // Deactivate other panels
-        TogglePanels(LissajousPanel);
+        TogglePanels(LissajousPanel);       // Deactivate other panels
+        StopAllCoroutines();                //Stop other coroutines
 
-        // Stop other coroutines
-        StopAllCoroutines();
-
+        
         if (objectA == null) {  SpawnObjectA(); }
         if (objectB == null) {  SpawnObjectB(); }
-;
+
+        //Setup Objects for Lissajous Demo
+        EnableLissajousComponents(objectA);
+        EnableLissajousComponents(objectB);
+        SetUpObjectMaterialandColor(objectA, Color.red);
+        SetUpObjectMaterialandColor(objectB, Color.blue);
+        if (objectA.TryGetComponent<VertexDisplacement>(out var displacement)) { displacement.enabled = false; }
+
+        // Position Object A & B for VR or nonVR mode
         if (inVRMode)
         {
             objectA.transform.position = sceneCameraTransform.position + new Vector3(-0.5f, 0f, 1f);
@@ -86,52 +93,33 @@ public class DemoManager : MonoBehaviour
             objectB.transform.position = sceneCameraTransform.position + new Vector3(5f, 0f, 5f);
         }
 
-        DisableAutoRotation(objectA);
-        DisableAutoRotation(objectB);
-
-        if (objectA.GetComponent<VertexDisplacement>() != null)
+        //Sync sliders to values and setup UI button bindings only the first time
+        if(!LissajousUIListenersSetUp)
         {
-            objectA.GetComponent<VertexDisplacement>().enabled = false;
+            var lissajousA = objectA.GetComponent<LissajousMovement>();
+            var lissajousB = objectB.GetComponent<LissajousMovement>();
+            objectAUI.BindTo(lissajousA);
+            objectBUI.BindTo(lissajousB);
+            LissajousUIListenersSetUp = true;
         }
-        
-        objectA.GetComponent<LissajousMovement>().enabled=true;
-        objectB.GetComponent<LissajousMovement>().enabled = true;
-        objectA.GetComponent<TrailRenderer>().enabled = true;
-        objectB.GetComponent<TrailRenderer>().enabled = true;
-        var lissajousA = objectA.GetComponent<LissajousMovement>();
-        var lissajousB = objectB.GetComponent<LissajousMovement>();
-        objectAUI.BindTo(lissajousA);
-        objectBUI.BindTo(lissajousB);
     }
     public void SetupObjectRotationDemo()
     {
-        // Deactivate other panels
-        TogglePanels(objectRotationPanel);
+        TogglePanels(objectRotationPanel);      // Deactivate other panels
+        StopAllCoroutines();                    // Stop other coroutines
 
-        // Stop other coroutines
-        StopAllCoroutines();
-
+        //Spawn Objects for demo if havent been spawned
         if (objectA == null) { SpawnObjectA(); }
         if (objectB == null) { SpawnObjectB(); }
-        
-        DisableAutoRotation(objectA);
-        DisableAutoRotation(objectB);
-        objectA.GetComponent<TrailRenderer>().enabled = false;
-        objectB.GetComponent<TrailRenderer>().enabled= false;
-        objectA.GetComponent<LissajousMovement>().enabled = false;
-        objectB.GetComponent<LissajousMovement>().enabled = false;
 
-        if (objectA.GetComponent<VertexDisplacement>() != null)
-        {
-            objectA.GetComponent<VertexDisplacement>().enabled = false;
-        }
-        objectA.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
-        objectA.GetComponent<Renderer>().material.color=Color.red;
-        objectB.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
-        objectB.GetComponent<Renderer>().material.color = Color.blue;
+        //Setup Objects for Rotation Demo
+        DisableLissajousComponents(objectA);
+        DisableLissajousComponents(objectB);
+        SetUpObjectMaterialandColor(objectA, Color.red);
+        SetUpObjectMaterialandColor(objectB, Color.blue);
+        if (objectA.TryGetComponent<VertexDisplacement>(out var displacement)) { displacement.enabled = false; }
 
-        objectRotationDemoHandler.Initialise(objectA, objectB);
-
+        // Position Object A & B for VR or nonVR mode
         if (inVRMode)
         {
             objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * 1f;
@@ -139,34 +127,26 @@ public class DemoManager : MonoBehaviour
         else
         {
             objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * 5f;
-
         }
 
-        // Start coroutine
-        rotationRoutine = StartCoroutine(objectRotationDemoHandler.RotateTowardsMovingTarget());
+        objectRotationDemoHandler.Initialise(objectA, objectB);                                     //initialise values for coroutine
+        rotationRoutine = StartCoroutine(objectRotationDemoHandler.RotateTowardsMovingTarget());    // Start coroutine
     }
     public void SetupColorChangeDemo()
-    {
+    {   
+        TogglePanels(colorChangePanel);     // Deactivate other panels
+        StopAllCoroutines();                // Stop other routines
+
+        //Spawn Objects for demo if havent been spawned
         if (objectA == null) { SpawnObjectA(); }
         if (objectB == null) { SpawnObjectB(); }
-        // Deactivate other panels
-        TogglePanels(colorChangePanel);
 
-        // Stop other routines
-        StopAllCoroutines();
+        //Setup Objects for Color Change Demo
+        DisableLissajousComponents(objectA);
+        DisableLissajousComponents(objectB);
+        if (objectA.TryGetComponent<VertexDisplacement>(out var displacement)) { displacement.enabled = false; }
 
-        DisableAutoRotation(objectA);
-        DisableAutoRotation(objectB);
-        objectA.GetComponent<LissajousMovement>().enabled = false;
-        objectB.GetComponent<LissajousMovement>().enabled = false;
-        objectA.GetComponent<TrailRenderer>().enabled = false;
-        objectB.GetComponent<TrailRenderer>().enabled = false;
-        if (objectA.GetComponent<VertexDisplacement>() != null)
-        {
-            objectA.GetComponent<VertexDisplacement>().enabled = false;
-        }
-        // Center obj A and point it to the right
-
+        // Position Object A for VR or nonVR mode
         if (inVRMode)
         {
             objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * 1f;
@@ -175,81 +155,65 @@ public class DemoManager : MonoBehaviour
         {
             objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * 5f;
         }
-        
         objectA.transform.rotation = Quaternion.LookRotation(sceneCameraTransform.right, Vector3.up);
 
-        colorChangeHandler.Initialise(objectA, objectB);
         // Apply the material with the shader
         var objectArenderer = objectA.GetComponent<Renderer>();
         objectArenderer.material = new Material(colorChangeHandler.colorChangeMaterial);
 
-        // Start coroutine
-        colorChangeRoutine = StartCoroutine(colorChangeHandler.ColorChangeEffect());
+        colorChangeHandler.Initialise(objectA, objectB);                                //initialise values for coroutine
+        colorChangeRoutine = StartCoroutine(colorChangeHandler.ColorChangeEffect());    // Start coroutine
     }
     public void SetupVertexAnimationDemo()
-    {
+    {   
+        TogglePanels(vertexAnimationPanel);     // Deactivate other panels
+        StopAllCoroutines();                    // Stop other routines
+
+        //Spawn Objects for Vertex Anim demo if havent been spawned
         if (objectA == null) { SpawnObjectA(); }
-        if (objectB != null) objectB.transform.position=new Vector3(0,-100f,0);// move object B out of view
-        TogglePanels(vertexAnimationPanel);
+        if (objectB == null) { SpawnObjectB(); }
 
-        DisableAutoRotation(objectA);
-        DisableAutoRotation(objectB);
-        objectA.GetComponent<TrailRenderer>().enabled = false;
-        objectB.GetComponent<TrailRenderer>().enabled = false;
-        objectA.GetComponent<LissajousMovement>().enabled = false;
-        objectB.GetComponent<LissajousMovement>().enabled = false;
+        //Setup Objects for Color Change Demo
+        DisableLissajousComponents(objectA);
+        DisableLissajousComponents(objectB);
+        if (!objectA.TryGetComponent<VertexDisplacement>(out var displacer)){displacer = objectA.AddComponent<VertexDisplacement>(); }//Make sure the object A has a VertexDisplacement component
+        objectA.GetComponent<Renderer>().material = VertexAnimationMaterial;    //Change Object A mat to a Fresnel Mat
+        objectB.transform.position = new Vector3(0, -1000f, 0);                 // move object B out of view
 
-        // Stop other routines
-        StopAllCoroutines();
-
-        // Position Object A in center of view  2f for VR mode 7f for nonVR mode
+        // Position Object A for VR or nonVR mode
         float offset = inVRMode ? 2f : 7f;
         objectA.transform.position = sceneCameraTransform.position + sceneCameraTransform.forward * offset;
 
-        objectA.GetComponent<Renderer>().material = VertexAnimationMaterial;
-
-        //Make sure the object has a VertexDisplacement component
-        if (!objectA.TryGetComponent<VertexDisplacement>(out var displacer))
+        //Sync sliders to values and setup UI button bindings only the first time
+        if (!VertexAnimationListenersSetUp)
         {
-            displacer = objectA.AddComponent<VertexDisplacement>();
+            noiseScrollSpeedSlider.value = displacer.scrollSpeed;
+            noiseScaleSlider.value = displacer.noiseScale;
+            noiseDisplacementSlider.value = displacer.noiseDisplacement;
+            noiseScrollSpeedSlider.onValueChanged.AddListener((val) => displacer.scrollSpeed = val);
+            noiseScaleSlider.onValueChanged.AddListener((val) => displacer.noiseScale = val);
+            noiseDisplacementSlider.onValueChanged.AddListener((val) => displacer.noiseDisplacement = val);
         }
-
-        // Sync sliders to values and setup UI bindings
-        noiseScrollSpeedSlider.value = displacer.scrollSpeed;
-        noiseScaleSlider.value = displacer.noiseScale;
-        noiseDisplacementSlider.value = displacer.noiseDisplacement;
-
-        noiseScrollSpeedSlider.onValueChanged.AddListener((val) => displacer.scrollSpeed = val);
-        noiseScaleSlider.onValueChanged.AddListener((val) => displacer.noiseScale = val);
-        noiseDisplacementSlider.onValueChanged.AddListener((val) => displacer.noiseDisplacement = val);
     }
     public void SetupVRAttractorDemo()
-    {
+    {   
+        TogglePanels(vrAttractorSidePanel);     // Deactivate other panels
+        StopAllCoroutines();                    // Stop other routines
+
         if (objectA == null) { SpawnObjectA(); }
         if (objectB == null) { SpawnObjectB(); }
-        // Deactivate other panels
-        TogglePanels(vrAttractorSidePanel);
+        DisableLissajousComponents(objectA);
+        DisableLissajousComponents(objectB);
+        SetUpObjectMaterialandColor(objectA, Color.red);
+        SetUpObjectMaterialandColor(objectB, Color.blue);
 
-        // Stop other routines
-        StopAllCoroutines();
-
-        DisableAutoRotation(objectA);
-        DisableAutoRotation(objectB);
-        objectA.GetComponent<LissajousMovement>().enabled = false;
-        objectB.GetComponent<LissajousMovement>().enabled = false;
-        objectA.GetComponent<TrailRenderer>().enabled = false;
-        objectB.GetComponent<TrailRenderer>().enabled = false;
         if (objectA.GetComponent<VertexDisplacement>() != null) {   objectA.GetComponent<VertexDisplacement>().enabled = false; }
 
-        objectA.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
-        objectA.GetComponent<Renderer>().material.color = Color.red;
-        objectB.GetComponent<Renderer>().material = proceduralMeshGenerator.defaultMeshMaterial;
-        objectB.GetComponent<Renderer>().material.color = Color.blue;
 
-        vrAttractorHandler.Initialise(objectA, objectB,GetComponent<XROrigin>());
-        vrAttractorHandler.ResetVRAttractionDemo();
-
-        vrAttractionRoutine = StartCoroutine(vrAttractorHandler.VRAttractionEffect());
+        // Sync sliders to values and setup UI button bindings
+        vrAttractorHandler.Initialise(objectA, objectB,GetComponent<XROrigin>());       //initialise values for coroutine
+        vrAttractorHandler.ResetVRAttractionDemo();                                     //Reset Objects 
+        vrAttractionRoutine = StartCoroutine(vrAttractorHandler.VRAttractionEffect());  // Start coroutine
     }
     #region Helper Functions
     public void SpawnObjectA()
@@ -271,11 +235,8 @@ public class DemoManager : MonoBehaviour
     private GameObject SpawnObject(string name, Vector3 offset, Color color)
     {
         GameObject obj = proceduralMeshGenerator.GenerateDemoGameobject(name);
-        // var camTransform = GetComponent<XROrigin>().Camera.transform;
 
-        //obj.transform.position = camTransform.position + (camTransform.forward * offset.z) + (camTransform.right * offset.x) + (camTransform.up * offset.y);
         obj.transform.position = sceneCameraTransform.transform.position + (sceneCameraTransform.forward * offset.z) + (sceneCameraTransform.right * offset.x) + (sceneCameraTransform.up * offset.y);
-        //obj.transform.SetParent(transform);
 
         obj.AddComponent<LissajousMovement>();
         obj.GetComponent<LissajousMovement>().enabled = false;
@@ -327,15 +288,50 @@ public class DemoManager : MonoBehaviour
         trail.startWidth = trail.endWidth = 0.01f;
         trail.time = 3f;
     }
+    public void SetupUIListeners()
+    {
+        //setup listners for  UI panel elements
 
-    public void SetupUIListners()
-    {       
+        //Lissajous Sliders
         //TODO
-        //setup listners for all UI panel elements
-        //Lissajous
-        //Object Rotation
-        //Color Change
-        //
+
+        //Object Rotation Sliders
+        objectRotationDemoHandler.angularSpeedSlider.onValueChanged.AddListener((value) => objectRotationDemoHandler.angularSpeed = value);
+        objectRotationDemoHandler.angularSpeedSlider.value = objectRotationDemoHandler.angularSpeed;
+
+        //Color Change Sliders
+        colorChangeHandler.rotationSpeedSlider.onValueChanged.AddListener((value) => colorChangeHandler.rotationSpeed = value);
+        colorChangeHandler.rotationSpeedSlider.value = colorChangeHandler.rotationSpeed;
+
+        //VertexAnimation
+        //TODO
+
+        //VRAttraction Sliders
+        vrAttractorHandler.rightControllerattractionForceSlider.onValueChanged.AddListener((value) => vrAttractorHandler.rightControllerattractionForce = value);
+        vrAttractorHandler.leftControllerattractionForceSlider.onValueChanged.AddListener((value) => vrAttractorHandler.leftControllerattractionForce = value);
+        vrAttractorHandler.rightControllerattractionForceSlider.value = vrAttractorHandler.rightControllerattractionForce;
+        vrAttractorHandler.leftControllerattractionForceSlider.value = vrAttractorHandler.leftControllerattractionForce;
+
+    }
+    private void DisableLissajousComponents(GameObject gameObject)
+    {  
+        //Disable components needed only for Lissajous demo
+        gameObject.GetComponent<LissajousMovement>().enabled = false;
+        gameObject.GetComponent<TrailRenderer>().enabled = false;
+        DisableAutoRotation(gameObject);
+    }
+    private void EnableLissajousComponents(GameObject gameObject)
+    {
+        //Enable components needed only for Lissajous demo
+        gameObject.GetComponent<LissajousMovement>().enabled = true;
+        gameObject.GetComponent<TrailRenderer>().enabled = true;
+        DisableAutoRotation(gameObject);
+    }
+    private void SetUpObjectMaterialandColor(GameObject obj, Color color)
+    {   //Setup Material color for object. useful in some demos
+        Renderer renderer = obj.GetComponent<Renderer>();
+        renderer.material = proceduralMeshGenerator.defaultMeshMaterial;
+        renderer.material.color = color;
     }
     #endregion
 }
